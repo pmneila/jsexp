@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Reaction diffusion simulation</title>
+        <link rel="stylesheet" type="text/css" href="../css/experiments.css"/>
+		<link type="text/css" href="../3rd/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+		<script type="text/javascript" src="../3rd/jquery-1.6.2.min.js"></script>
+		<script type="text/javascript" src="../3rd/jquery-ui-1.8.16.custom.min.js"></script>
+        <script type="text/javascript" src="grayscott.js"></script>
+        <meta charset="UTF-8">
+        <script>
+        	$(function()
+        	{
+        		init();
+        	});
+        </script>
+    </head>
+    <body>
+		<header>
+			<h1>Reaction diffusion system (Gray-Scott model)</h1>
+		</header>
+		<div id="simulation">
+           	<canvas id="myCanvas" class="viewer" style="width:512px;height:512px"></canvas>
+	        <aside class="panel">
+	            <section id="instructions">
+	                <header><h4>Instructions</h4></header>
+	                <ol>
+	                    <li>Paint some strokes on the canvas.</li>
+	                    <li>Change the rates of feed and death with the controls below,
+							or choose a preset.</li>
+	                    <li>Watch the evolution.</li>
+	                </ol>
+	            </section>
+	            <section id="controls">
+	                <header><h4>Controls</h4></header>
+	                <form name="ex">
+		                Presets: <select name="scene"
+		                    onchange="loadPreset(document.ex.scene.selectedIndex)">
+		                    <option value="0" selected="selected">Default</option>
+		                    <option value="1">Mitosis</option>
+		                    <option value="2">Blobs</option>
+		                    <option value="3">Mazes</option>
+		                    <option value="4">Holes</option>
+		                    <option value="5">Pulsanting blobs</option>
+		                    <option value="6">Waves</option>
+		                </select><br/><br/>
+	                    Feed rate:
+	                    <span class ="remark" id="replenishment"></span><br/>
+	                    <div id="sld_replenishment" class="slider"></div>
+                    	
+	                    Death rate:
+	                    <span class ="remark" id="diminishment"></span><br/>
+	                    <div id="sld_diminishment" class="slider"></div>
+	                    <!--input name="sldDiminishment" type="range" min="0" max="73" value="60"
+	                        onchange="formToWorld()"/><br/-->
+						<p style="text-align:right">
+	                    <input type="button" value="Clear screen" onclick="clean()"/>
+	                    <p/>
+	                </form>
+	            </section>
+	        </aside>
+		</div>
+        <footer>
+			<div id="copyright">
+				&copy;2011 @pmneila
+			</div>
+		</footer>
+    </body>
+</html>
