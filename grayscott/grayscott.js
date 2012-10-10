@@ -4,66 +4,80 @@
  *
  * A solver of the Gray-Scott model of reaction diffusion.
  *
- * ©2011 pmneila.
+ * ©2012 pmneila.
  * p.mneila at upm.es
  */
 
+(function(){
+
 // Canvas.
 var canvas;
-var canvasWidth = 128;
-var canvasHeight = 128;
-var canvasScale = 4.0;
-var ctx;
-var mouseDown = false;
-var mouseX, mouseY;
 var simulation;
+var canvasWidth = 1024;
+var canvasHeight = 512;
 
-// Configuration.
-var feed = 0.033;
-var kill = 0.06;
-var timeStep = 1.0;
+var mMouseX, mMouseY;
+var mMouseDown = false;
 
-// Buffers.
-var buffer;
-var imageData;
-var srcBuffer = 0;
+var mRenderer;
+var mScene;
+var mCamera;
+var mUniforms;
+
+var mTexture1, mTexture2;
+var mGSMaterial, mScreenMaterial;
+var mScreenQuad;
+
+var mToggled = false;
+
+var mMinusOnes = new THREE.Vector2(-1, -1);
 
 // Some presets.
 var presets = [
     { // Default
-        feed: 0.033,
-        kill: 0.060
+        //feed: 0.018,
+        //kill: 0.051
+        feed: 0.037,
+        kill: 0.06
     },
-    { // Mitosis
-        feed: 0.047,
-        kill: 0.073
+    { // Solitons
+        feed: 0.03,
+        kill: 0.062
     },
-    { // Blobs
-        feed: 0.033,
-        kill: 0.064
+    { // Worms.
+        feed: 0.078,
+        kill: 0.061
     },
     { // Mazes
-        feed: 0.032,
+        feed: 0.029,
         kill: 0.057
     },
     { // Holes
-        feed: 0.033,
-        kill: 0.054
+        feed: 0.026,
+        kill: 0.053
     },
-    { // Pulsating blobs
-        feed: 0.012,
-        kill: 0.044
+    { // Chaos
+        feed: 0.026,
+        kill: 0.051
+    },
+    { // Spots and loops.
+        feed: 0.018,
+        kill: 0.051
     },
     { // Waves
-        feed: 0.006,
-        kill: 0.037
+        feed: 0.014,
+        kill: 0.045
     }
 ];
 
-function init()
+// Configuration.
+var feed = presets[0].feed;
+var kill = presets[0].kill;
+
+init = function()
 {
-	init_controls();
-	
+    init_controls();
+    
     canvas = document.getElementById("myCanvas");
     // Fix a bug in the mouse behavior in Firefox.
     simulation = document.getElementById("simulation");
@@ -71,155 +85,154 @@ function init()
     canvas.onmousedown = onMouseDown;
     canvas.onmouseup = onMouseUp;
     canvas.onmousemove = onMouseMove;
-    ctx = canvas.getContext("2d");
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
     
-    // Initialize the buffers.
-    buffer = new Array(2); // Double buffer.
-    buffer[0] = new Array(2); // Two components.
-    buffer[1] = new Array(2);
-    buffer[0][0] = new Array(canvasHeight);
-    buffer[0][1] = new Array(canvasHeight);
-    buffer[1][0] = new Array(canvasHeight);
-    buffer[1][1] = new Array(canvasHeight);
-    for(var i=0; i<canvasHeight; i++)
-    {
-        buffer[0][0][i] = new Array(canvasWidth);
-        buffer[0][1][i] = new Array(canvasWidth);
-        buffer[1][0][i] = new Array(canvasWidth);
-        buffer[1][1][i] = new Array(canvasWidth);
-    }
+    mRenderer = new THREE.WebGLRenderer({canvas: canvas, preserveDrawingBuffer: true});
+    mRenderer.setSize(canvasWidth, canvasHeight);
     
-    // Create the image data object
-    imageData = ctx.createImageData(canvasWidth, canvasHeight);
+    mScene = new THREE.Scene();
+    mCamera = new THREE.OrthographicCamera(canvasWidth/-2, canvasWidth/2, canvasHeight/2, canvasHeight/-2, -10000, 10000);
+    mCamera.position.z = 100;
+    mScene.add(mCamera);
     
-    clean();
-    setInterval(run, 10);
+    mTexture1 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
+                        {minFilter: THREE.LinearFilter,
+                         magFilter: THREE.LinearFilter,
+                         format: THREE.RGBFormat,
+                         type: THREE.FloatType});
+    mTexture2 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
+                        {minFilter: THREE.LinearFilter,
+                         magFilter: THREE.LinearFilter,
+                         format: THREE.RGBFormat,
+                         type: THREE.FloatType});
+    mTexture1.wrapS = THREE.RepeatWrapping;
+    mTexture1.wrapT = THREE.RepeatWrapping;
+    mTexture2.wrapS = THREE.RepeatWrapping;
+    mTexture2.wrapT = THREE.RepeatWrapping;
+    
+    mUniforms = {
+        screenWidth: {type: "f", value: canvasWidth/2},
+        screenHeight: {type: "f", value: canvasHeight/2},
+        tSource: {type: "t", value: mTexture1},
+        delta: {type: "f", value: 1.0},
+        feed: {type: "f", value: feed},
+        kill: {type: "f", value: kill},
+        brush: {type: "v2", value: new THREE.Vector2(-10, -10)}
+    };
+    
+    mGSMaterial = new THREE.ShaderMaterial({
+            uniforms: mUniforms,
+            vertexShader: document.getElementById('standardVertexShader').textContent,
+            fragmentShader: document.getElementById('gsFragmentShader').textContent,
+        });
+    mScreenMaterial = new THREE.ShaderMaterial({
+                uniforms: mUniforms,
+                vertexShader: document.getElementById('standardVertexShader').textContent,
+                fragmentShader: document.getElementById('screenFragmentShader').textContent,
+            });
+    
+    var plane = new THREE.PlaneGeometry(canvasWidth, canvasHeight);
+    mScreenQuad = new THREE.Mesh(plane, mScreenMaterial);
+    mScene.add(mScreenQuad);
+    
+    render(0);
+    mUniforms.brush.value = new THREE.Vector2(0.5, 0.5);
+    requestAnimationFrame(render);
 }
 
-function run()
+var render = function(time)
 {
-    ctx.strokeStyle = "rgba(255, 255, 255, 255)";
-    ctx.fillStyle = ctx.strokeStyle;
+    mScreenQuad.material = mGSMaterial;
+    mUniforms.delta.value = 0.8;
+    mUniforms.feed.value = feed;
+    mUniforms.kill.value = kill;
     
-    // Double buffer.
-    src = buffer[srcBuffer];
-    dst = buffer[1 - srcBuffer];
-    src_u = src[0];
-    src_v = src[1];
-    dst_u = dst[0];
-    dst_v = dst[1];
-    
-    // Solve the PDEs.
-    var imgd = imageData.data;
-    for(i=1; i<canvasHeight-1; i++)
+    for(var i=0; i<8; ++i)
     {
-        base = i*imageData.width*4;
-        for(j=1; j<canvasWidth-1; j++)
+        if(!mToggled)
         {
-            u = src_u[i][j];
-            v = src_v[i][j];
-            lapl_u = src_u[i+1][j]+src_u[i-1][j]+src_u[i][j+1]+src_u[i][j-1]-4*u;
-            lapl_v = src_v[i+1][j]+src_v[i-1][j]+src_v[i][j+1]+src_v[i][j-1]-4*v;
-            uvv = u*v*v;
-            du = 0.095*lapl_u - uvv + feed*(1-u);
-            dv = 0.03*lapl_v + uvv - (feed+kill)*v;
-            dst_u[i][j] = u + du*timeStep;
-            dst_v[i][j] = v + dv*timeStep;
-            
-            idx = base + j*4;
-            imgd[idx] = dst_v[i][j]*255;
-            imgd[idx+1] = dst_v[i][j]*255;
-            imgd[idx+2] = dst_v[i][j]*255;
-            imgd[idx+3] = 255;
+            mUniforms.tSource.value = mTexture1;
+            mRenderer.render(mScene, mCamera, mTexture2, true);
+            mUniforms.tSource.value = mTexture2;
         }
+        else
+        {
+            mUniforms.tSource.value = mTexture2;
+            mRenderer.render(mScene, mCamera, mTexture1, true);
+            mUniforms.tSource.value = mTexture1;
+        }
+        
+        mToggled = !mToggled;
+        mUniforms.brush.value = mMinusOnes;
     }
     
-    // Update the image.
-    ctx.putImageData(imageData, 0, 0);
-    srcBuffer = 1 - srcBuffer;
+    mScreenQuad.material = mScreenMaterial;
+    mRenderer.render(mScene, mCamera);
+    
+    requestAnimationFrame(render);
 }
 
-// Clear the screen.
-function clean()
-{
-    for(var i=0; i<canvasHeight; i++)
-    {
-        for(var j=0; j<canvasWidth; j++)
-        {
-            buffer[0][0][i][j] = 0.5;
-            buffer[0][1][i][j] = 0;
-            buffer[1][0][i][j] = 0;
-            buffer[1][1][i][j] = 0;
-        }
-    }
-}
-
-function loadPreset(idx)
+loadPreset = function(idx)
 {
     feed = presets[idx].feed;
     kill = presets[idx].kill;
     worldToForm();
 }
 
-function brush(x, y)
-{
-    b = buffer[srcBuffer][1];
-    if(x-3<=0 || x+4>=canvasWidth || y-3<=0 || y+4>=canvasHeight)
-        return;
-    
-    for(i=y-3; i<=y+3; i++)
-    {
-        for(j=x-3; j<=x+3; j++)
-        {
-            b[i][j] = 0.9;
-        }
-    }
-}
-
-function onMouseMove(e)
+var onMouseMove = function(e)
 {
     var ev = e ? e : window.event;
-    mouseX = Math.round((ev.clientX - simulation.offsetLeft)/canvasScale);
-    mouseY = Math.round((ev.clientY - simulation.offsetTop)/canvasScale);
+    mMouseX = Math.round(ev.clientX - simulation.offsetLeft);
+    mMouseY = Math.round(ev.clientY - simulation.offsetTop);
     
-    if(mouseDown)
-        brush(mouseX, mouseY);
+    if(mMouseDown)
+        mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
 }
 
-function onMouseDown(e)
+var onMouseDown = function(e)
 {
     var ev = e ? e : window.event;
-    mouseDown = true;
+    mMouseDown = true;
     
-    brush(mouseX, mouseY);
+    mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
 }
 
-function onMouseUp(e)
+var onMouseUp = function(e)
 {
-    mouseDown = false;
+    mMouseDown = false;
 }
 
-function worldToForm()
+clean = function()
+{
+    mUniforms.brush.value = new THREE.Vector2(-10, -10);
+}
+
+snapshot = function()
+{
+    var dataURL = canvas.toDataURL("image/png");
+    window.open(dataURL, "name-"+Math.random());
+}
+
+var worldToForm = function()
 {
     //document.ex.sldReplenishment.value = feed * 1000;
     $("#sld_replenishment").slider("value", feed);
     $("#sld_diminishment").slider("value", kill);
 }
 
-function init_controls()
+var init_controls = function()
 {
 	$("#sld_replenishment").slider({
-		value: 0.033, min: 0, max:0.1, step:0.001,
+		value: feed, min: 0, max:0.1, step:0.001,
 		change: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value;},
 		slide: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value;}
 	});
-	$("#sld_replenishment").slider("value", 0.033);
+	$("#sld_replenishment").slider("value", feed);
 	$("#sld_diminishment").slider({
-		value: 0.060, min: 0, max:0.073, step:0.001,
+		value: kill, min: 0, max:0.073, step:0.001,
 		change: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value;},
 		slide: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value;}
 	});
-	$("#sld_diminishment").slider("value", 0.060);
+	$("#sld_diminishment").slider("value", kill);
 }
+
+})();
