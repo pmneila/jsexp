@@ -53,11 +53,11 @@ Some screenshots of the application.
 .. image:: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/waves2_s.png
   :target: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/waves2.png
 
-.. image:: grayscott/snapshots/worm_s.png
-  :target: grayscott/snapshots/worm.png
+.. image:: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/worm_s.png
+  :target: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/worm.png
 
-.. image:: grayscott/snapshots/worms_s.png
-  :target: grayscott/snapshots/worms.png
+.. image:: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/worms_s.png
+  :target: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/worms.png
 
 
 `Particles <http://pmneila.github.com/jsexp/particles/>`_
