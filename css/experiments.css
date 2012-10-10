@@ -44,6 +44,10 @@ header, footer, aside, nav {
         font-size: 9pt;
         background:#151515;
     }
+        #simulation .panel header {
+            color: #ffffff;
+        }
+        
     	#simulation .panel .slider {
     		margin: 7px 10px 10px 10px;
     	}
