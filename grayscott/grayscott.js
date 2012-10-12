@@ -75,6 +75,10 @@ var presets = [
     { // Waves
         feed: 0.014,
         kill: 0.045
+    },
+    { // The U-Skate World
+        feed: 0.062,
+        kill: 0.06093
     }
 ];
 

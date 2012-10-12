@@ -48,9 +48,9 @@
                 vec2 uv2 = texture2D(tSource, vUv+vec2(0.0, -step_y)).rg;
                 vec2 uv3 = texture2D(tSource, vUv+vec2(0.0, step_y)).rg;
                 
-                vec2 lapl = (uv0 + uv1 + uv2 + uv3 - 4.0*uv)*10485.76;
-                float du = 0.00002*lapl.r - uv.r*uv.g*uv.g + feed*(1.0 - uv.r);
-                float dv = 0.00001*lapl.g + uv.r*uv.g*uv.g - (feed+kill)*uv.g;
+                vec2 lapl = (uv0 + uv1 + uv2 + uv3 - 4.0*uv);//10485.76;
+                float du = /*0.00002*/0.2097*lapl.r - uv.r*uv.g*uv.g + feed*(1.0 - uv.r);
+                float dv = /*0.00001*/0.105*lapl.g + uv.r*uv.g*uv.g - (feed+kill)*uv.g;
                 vec2 dst = uv + delta*vec2(du, dv);
                 
                 if(brush.x > 0.0)
@@ -140,6 +140,7 @@
                             <option value="7">Moving spots</option>
                             <option value="8">Spots and loops</option>
                             <option value="9">Waves</option>
+                            <option value="10">The U-Skate world</option>
                         </select>
                                         <p style="text-align:left">
                     <input type="button" value="Clear" onclick="clean()"/>
