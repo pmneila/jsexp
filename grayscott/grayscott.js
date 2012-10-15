@@ -44,6 +44,10 @@ var presets = [
         feed: 0.03,
         kill: 0.062
     },
+    { // Pulsating solitons
+        feed: 0.025,
+        kill: 0.06
+    },
     { // Worms.
         feed: 0.078,
         kill: 0.061
@@ -53,12 +57,16 @@ var presets = [
         kill: 0.057
     },
     { // Holes
-        feed: 0.026,
-        kill: 0.053
+        feed: 0.039,
+        kill: 0.058
     },
     { // Chaos
         feed: 0.026,
         kill: 0.051
+    },
+    { // Moving spots.
+        feed: 0.014,
+        kill: 0.054
     },
     { // Spots and loops.
         feed: 0.018,
@@ -67,6 +75,10 @@ var presets = [
     { // Waves
         feed: 0.014,
         kill: 0.045
+    },
+    { // The U-Skate World
+        feed: 0.062,
+        kill: 0.06093
     }
 ];
 

@@ -3,33 +3,34 @@
     <head>
         <title>Reaction diffusion simulation</title>
         <link rel="stylesheet" type="text/css" href="../css/experiments.css"/>
-		<link type="text/css" href="../3rd/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
-		<script type="text/javascript" src="../3rd/jquery-1.6.2.min.js"></script>
-		<script type="text/javascript" src="../3rd/jquery-ui-1.8.16.custom.min.js"></script>
-		<!--script type="text/javascript" src="three.min.js"></script-->
-		<script type="text/javascript" src="http://mrdoob.github.com/three.js/build/three.min.js"></script>
+        <link type="text/css" href="../3rd/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+        <script type="text/javascript" src="../3rd/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="../3rd/jquery-ui-1.8.16.custom.min.js"></script>
+        <!--script type="text/javascript" src="../3rd/colorPicker.js"></script-->
+        <!--script type="text/javascript" src="three.min.js"></script-->
+        <script type="text/javascript" src="http://mrdoob.github.com/three.js/build/three.min.js"></script>
         <script type="x-shader/x-vertex" id="standardVertexShader">
-    		varying vec2 vUv;
+            varying vec2 vUv;
             
             void main()
             {
-            	vUv = uv;
-            	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
             }
         </script>
         <script type="x-shader/x-fragment" id="gsFragmentShader">
-    		varying vec2 vUv;
-    		uniform float screenWidth;
+            varying vec2 vUv;
+            uniform float screenWidth;
             uniform float screenHeight;
-    		uniform sampler2D tSource;
-    		uniform float delta;
-    		uniform float feed;
-    		uniform float kill;
-    		uniform vec2 brush;
-    		
-    		vec2 texel = vec2(1.0/screenWidth, 1.0/screenHeight);
-    		float step_x = 1.0/screenWidth;
-    		float step_y = 1.0/screenHeight;
+            uniform sampler2D tSource;
+            uniform float delta;
+            uniform float feed;
+            uniform float kill;
+            uniform vec2 brush;
+            
+            vec2 texel = vec2(1.0/screenWidth, 1.0/screenHeight);
+            float step_x = 1.0/screenWidth;
+            float step_y = 1.0/screenHeight;
             
             void main()
             {
@@ -39,15 +40,18 @@
                     return;
                 }
                 
+                //float feed = vUv.y * 0.083;
+                //float kill = vUv.x * 0.073;
+                
                 vec2 uv = texture2D(tSource, vUv).rg;
                 vec2 uv0 = texture2D(tSource, vUv+vec2(-step_x, 0.0)).rg;
                 vec2 uv1 = texture2D(tSource, vUv+vec2(step_x, 0.0)).rg;
                 vec2 uv2 = texture2D(tSource, vUv+vec2(0.0, -step_y)).rg;
                 vec2 uv3 = texture2D(tSource, vUv+vec2(0.0, step_y)).rg;
                 
-                vec2 lapl = (uv0 + uv1 + uv2 + uv3 - 4.0*uv)*10485.76;
-                float du = 0.00002*lapl.r - uv.r*uv.g*uv.g + feed*(1.0 - uv.r);
-                float dv = 0.00001*lapl.g + uv.r*uv.g*uv.g - (feed+kill)*uv.g;
+                vec2 lapl = (uv0 + uv1 + uv2 + uv3 - 4.0*uv);//10485.76;
+                float du = /*0.00002*/0.2097*lapl.r - uv.r*uv.g*uv.g + feed*(1.0 - uv.r);
+                float dv = /*0.00001*/0.105*lapl.g + uv.r*uv.g*uv.g - (feed+kill)*uv.g;
                 vec2 dst = uv + delta*vec2(du, dv);
                 
                 if(brush.x > 0.0)
@@ -58,19 +62,19 @@
                         dst.g = 0.9;
                 }
                 
-            	gl_FragColor = vec4(dst.r, dst.g, 0.0, 1.0);
+                gl_FragColor = vec4(dst.r, dst.g, 0.0, 1.0);
             }
         </script>
         <script type="x-shader/x-fragment" id="screenFragmentShader">
-    		varying vec2 vUv;
-    		uniform float screenWidth;
+            varying vec2 vUv;
+            uniform float screenWidth;
             uniform float screenHeight;
-    		uniform sampler2D tSource;
-    		uniform float delta;
-    		uniform float feed;
-    		uniform float kill;
-		    
-    		vec2 texel = vec2(1.0/screenWidth, 1.0/screenHeight);
+            uniform sampler2D tSource;
+            uniform float delta;
+            uniform float feed;
+            uniform float kill;
+            
+            vec2 texel = vec2(1.0/screenWidth, 1.0/screenHeight);
             
             void main()
             {
@@ -79,13 +83,6 @@
                 float a = fract(value);
                 vec4 col;
                 
-                /*if(step == 0)
-                {
-                    if(a<0.2)
-                        col = mix(vec4(0.0, 0.0, 0.2, 1.0), vec4(0.0, 1.0, 0.0, 1.0), a*5.0);
-                    else
-                        col = mix(vec4(0.0, 1.0, 0.0, 1.0), vec4(1.0, 1.0, 0.0, 1.0), (a-0.2)*10.0/8.0);
-                }*/
                 if(step == 0)
                     col = mix(vec4(0.0, 0.0, 0.2, 1.0), vec4(0.0, 1.0, 0.0, 1.0), a);
                 if(step == 1)
@@ -101,61 +98,87 @@
         <script type="text/javascript" src="grayscott.js"></script>
         <meta charset="UTF-8">
         <script>
-        	$(function()
-        	{
-        		init();
-        	});
+            $(function()
+            {
+                $("#color-dialog").dialog({
+                    autoOpen: false,
+                    height: 600,
+                    width: 600,
+                    modal: true,
+                    buttons: {
+                        Close: function(){
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+                
+                $("#choose-colors")
+                    .click(function(){
+                        $("#color-dialog").dialog("open");
+                    });
+                
+                init();
+            });
         </script>
     </head>
     <body>
-		<header>
-			<h1>Reaction diffusion system (Gray-Scott model)</h1>
-		</header>
-		<div id="simulation">
-           	<canvas id="myCanvas" class="viewer" style="width:1024px;height:512px"></canvas>
-	        <aside class="panel">
-	            <section id="instructions">
-	                <header><h4>Instructions</h4></header>
-	                <ol>
-	                    <li>Paint some strokes on the canvas.</li>
-	                    <li>Choose the evolution settings with the controls below.</li>
-	                    <li>Watch the evolution.</li>
-	                </ol>
-	            </section>
-	            <section id="controls">
-	                <header><h4>Controls</h4></header>
-	                <form name="ex">
-		                Presets: <select name="scene"
-		                    onchange="loadPreset(document.ex.scene.selectedIndex)">
-		                    <option value="0" selected="selected">Default</option>
-		                    <option value="1">Solitons</option>
-		                    <option value="2">Worms</option>
-		                    <option value="3">Mazes</option>
-		                    <option value="4">Holes</option>
-		                    <option value="5">Chaos</option>
-		                    <option value="6">Spots and loops</option>
-		                    <option value="7">Waves</option>
-		                </select>
-						<p style="text-align:left">
-	                    <input type="button" value="Clear" onclick="clean()"/>
-	                    <input type="button" value="Take snapshot" onclick="snapshot()"/>
-	                    <p/><br/>
-	                    <h4 class="unsafe">Advanced settings</h4>
-	                    Feed rate:
-	                    <span class="remark" id="replenishment"></span><br/>
-	                    <div id="sld_replenishment" class="slider"></div>
-                    	
-	                    Death rate:
-	                    <span class ="remark" id="diminishment"></span><br/>
-	                    <div id="sld_diminishment" class="slider"></div>
-	                </form>
-	            </section>
-	        </aside>
-		</div>
+        <div id="color-dialog" title="Colors">
+        </div>
+        
+        <header>
+            <h1>Reaction diffusion system (Gray-Scott model)</h1>
+        </header>
+        <div id="simulation">
+        <canvas id="myCanvas" class="viewer" style="width:1024px;height:512px"></canvas>
+        <aside class="panel">
+            <section id="instructions">
+                <header><h4>Instructions</h4></header>
+                <ol>
+                    <li>Paint some strokes on the canvas.</li>
+                    <li>Choose the evolution settings with the controls below.</li>
+                    <li>Watch the evolution.</li>
+                </ol>
+            </section>
+            <section id="controls">
+                <header><h4>Controls</h4></header>
+                <form name="ex">
+                        Presets: <select name="scene"
+                            onchange="loadPreset(document.ex.scene.selectedIndex)">
+                            <option value="0" selected="selected">Default</option>
+                            <option value="1">Solitons</option>
+                            <option value="2">Pulsating solitons</option>
+                            <option value="3">Worms</option>
+                            <option value="4">Mazes</option>
+                            <option value="5">Holes</option>
+                            <option value="6">Chaos</option>
+                            <option value="7">Moving spots</option>
+                            <option value="8">Spots and loops</option>
+                            <option value="9">Waves</option>
+                            <option value="10">The U-Skate world</option>
+                        </select>
+                    <p style="text-align:right">
+                        <input type="button" value="Clear" onclick="clean()"/>
+                        <input type="button" value="Take snapshot" onclick="snapshot()"/>
+                    <p/><br/>
+                    <h4 class="unsafe">Advanced settings</h4>
+                    Feed rate:
+                    <span class="remark" id="replenishment"></span><br/>
+                    <div id="sld_replenishment" class="slider"></div>
+                    
+                    Death rate:
+                    <span class ="remark" id="diminishment"></span><br/>
+                    <div id="sld_diminishment" class="slider"></div>
+                    <!--p style="text-align:right">
+                        <input type="button" value="Colors..." id="choose-colors"/>
+                    </p-->
+                </form>
+            </section>
+        </aside>
+        </div>
         <footer>
-			<div id="copyright">
-				&copy;2012 @pmneila
-			</div>
-		</footer>
+                <div id="copyright">
+                        &copy;2012 @pmneila
+                </div>
+        </footer>
     </body>
 </html>
