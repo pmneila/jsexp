@@ -3,11 +3,12 @@
     <head>
         <title>Reaction diffusion simulation</title>
         <link rel="stylesheet" type="text/css" href="../css/experiments.css"/>
-            <link type="text/css" href="../3rd/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
-            <script type="text/javascript" src="../3rd/jquery-1.6.2.min.js"></script>
-            <script type="text/javascript" src="../3rd/jquery-ui-1.8.16.custom.min.js"></script>
-            <!--script type="text/javascript" src="three.min.js"></script-->
-            <script type="text/javascript" src="http://mrdoob.github.com/three.js/build/three.min.js"></script>
+        <link type="text/css" href="../3rd/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+        <script type="text/javascript" src="../3rd/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="../3rd/jquery-ui-1.8.16.custom.min.js"></script>
+        <!--script type="text/javascript" src="../3rd/colorPicker.js"></script-->
+        <script type="text/javascript" src="three.min.js"></script>
+        <!--script type="text/javascript" src="http://mrdoob.github.com/three.js/build/three.min.js"></script-->
         <script type="x-shader/x-vertex" id="standardVertexShader">
             varying vec2 vUv;
             
@@ -82,13 +83,6 @@
                 float a = fract(value);
                 vec4 col;
                 
-                /*if(step == 0)
-                {
-                    if(a<0.2)
-                        col = mix(vec4(0.0, 0.0, 0.2, 1.0), vec4(0.0, 1.0, 0.0, 1.0), a*5.0);
-                    else
-                        col = mix(vec4(0.0, 1.0, 0.0, 1.0), vec4(1.0, 1.0, 0.0, 1.0), (a-0.2)*10.0/8.0);
-                }*/
                 if(step == 0)
                     col = mix(vec4(0.0, 0.0, 0.2, 1.0), vec4(0.0, 1.0, 0.0, 1.0), a);
                 if(step == 1)
@@ -106,11 +100,31 @@
         <script>
             $(function()
             {
-                    init();
+                $("#color-dialog").dialog({
+                    autoOpen: false,
+                    height: 600,
+                    width: 600,
+                    modal: true,
+                    buttons: {
+                        Close: function(){
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+                
+                $("#choose-colors")
+                    .click(function(){
+                        $("#color-dialog").dialog("open");
+                    });
+                
+                init();
             });
         </script>
     </head>
     <body>
+        <div id="color-dialog" title="Colors">
+        </div>
+        
         <header>
             <h1>Reaction diffusion system (Gray-Scott model)</h1>
         </header>
@@ -142,7 +156,7 @@
                             <option value="9">Waves</option>
                             <option value="10">The U-Skate world</option>
                         </select>
-                    <p style="text-align:left">
+                    <p style="text-align:right">
                         <input type="button" value="Clear" onclick="clean()"/>
                         <input type="button" value="Take snapshot" onclick="snapshot()"/>
                     <p/><br/>
@@ -154,6 +168,9 @@
                     Death rate:
                     <span class ="remark" id="diminishment"></span><br/>
                     <div id="sld_diminishment" class="slider"></div>
+                    <!--p style="text-align:right">
+                        <input type="button" value="Colors..." id="choose-colors"/>
+                    </p-->
                 </form>
             </section>
         </aside>
