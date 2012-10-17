@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Gradient widget</title>
+        <link rel="stylesheet" type="text/css" href="../gradientui/gradientui.css"/>
+        <script type="text/javascript" src="../3rd/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="../3rd/colorPicker.js"></script>
+        <script type="text/javascript" src="gradientui.js"></script>
+        <style>
+            #test {width: 200px; border: 1px solid;}
+            #gradient { width: 100%; height: 45px;}
+        </style>
+        <script>
+            $(function(){
+                $("#gradient").gradient();
+            });
+        </script>
+    </head>
+    <body id="test">
+        <div>
+        <div id="gradient"></div>
+        </div>
+    </body>
+</html>

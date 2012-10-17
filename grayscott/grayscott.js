@@ -23,6 +23,8 @@ var mRenderer;
 var mScene;
 var mCamera;
 var mUniforms;
+var mColors;
+var mColorsNeedUpdate = true;
 
 var mTexture1, mTexture2;
 var mGSMaterial, mScreenMaterial;
@@ -128,8 +130,15 @@ init = function()
         delta: {type: "f", value: 1.0},
         feed: {type: "f", value: feed},
         kill: {type: "f", value: kill},
-        brush: {type: "v2", value: new THREE.Vector2(-10, -10)}
+        brush: {type: "v2", value: new THREE.Vector2(-10, -10)},
+        color1: {type: "v4", value: new THREE.Vector4(0, 0, 0.2, 0)},
+        color2: {type: "v4", value: new THREE.Vector4(0, 1, 0, 0.2)},
+        color3: {type: "v4", value: new THREE.Vector4(1, 1, 0, 0.21)},
+        color4: {type: "v4", value: new THREE.Vector4(1, 0, 0, 0.4)},
+        color5: {type: "v4", value: new THREE.Vector4(1, 1, 1, 0.6)}
     };
+    mColors = [mUniforms.color1, mUniforms.color2, mUniforms.color3, mUniforms.color4, mUniforms.color5];
+    $("#gradient").gradient("setUpdateCallback", onUpdatedColor);
     
     mGSMaterial = new THREE.ShaderMaterial({
             uniforms: mUniforms,
@@ -177,6 +186,9 @@ var render = function(time)
         mUniforms.brush.value = mMinusOnes;
     }
     
+    if(mColorsNeedUpdate)
+        updateUniformsColors();
+    
     mScreenQuad.material = mScreenMaterial;
     mRenderer.render(mScene, mCamera);
     
@@ -188,6 +200,23 @@ loadPreset = function(idx)
     feed = presets[idx].feed;
     kill = presets[idx].kill;
     worldToForm();
+}
+
+var updateUniformsColors = function()
+{
+    var values = $("#gradient").gradient("getValues");
+    for(var i=0; i<values.length; i++)
+    {
+        var v = values[i];
+        mColors[i].value = new THREE.Vector4(v[0], v[1], v[2], v[3]);
+    }
+    
+    mColorsNeedUpdate = false;
+}
+
+var onUpdatedColor = function()
+{
+    mColorsNeedUpdate = true;
 }
 
 var onMouseMove = function(e)
