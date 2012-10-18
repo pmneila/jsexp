@@ -20,7 +20,7 @@
         this.parent = parent;
         this.parent.$this.append('<div class="gradient-dragger"></div>');
         this.$this = parent.$this.children('.gradient-dragger:last');
-        this.width = parent.$this.children('.gradient-view').width() + 1;
+        this.width = parent.$this.children('.gradient-view').width() - 7;
         this.position = position;
         this.color = color;
         this.dragging = false;
@@ -90,10 +90,10 @@
         this.$this.append('<canvas class="gradient-view"></canvas>');
         
         this.gradientview = this.$this.children('.gradient-view:first');
-        this.gradientview.width(this.width - 11);
+        this.gradientview.width(this.width);
         this.gradientview.height(this.height - 21);
         this.gradientview.css('position', 'absolute');
-        this.gradientview.css('left', 5);
+        this.gradientview.css('left', 0);
         
         this.canvas = this.gradientview.get(0);
         this.canvas.width = this.gradientview.width();
