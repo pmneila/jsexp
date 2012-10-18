@@ -62,6 +62,15 @@ Some screenshots of the application.
 .. image:: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/inverseworms_s.png
   :target: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/inverseworms.png
 
+.. image:: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/chaos_s.png
+  :target: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/chaos.png
+
+.. image:: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/spotsx_s.png
+  :target: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/spotsx.png
+
+.. image:: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/wormsx_s.png
+  :target: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/wormsx.png
+
 
 `Particles <http://pmneila.github.com/jsexp/particles/>`_
 =========================================================
