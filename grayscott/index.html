@@ -122,7 +122,14 @@
         <script type="text/javascript" src="grayscott.js"></script>
         <meta charset="UTF-8">
         <style>
-            #gradient { width: auto; height: 45px;}
+            #gradient
+            {
+                height: 40px;
+                width: 85%;
+                margin-top: 5px;
+                margin-left:auto;
+                margin-right:auto;
+            }
         </style>
         <script>
             $(function()
@@ -138,7 +145,7 @@
                 colorPicker.offsetX = -512;
                 colorPicker.offsetY = -256;
                 
-                document.getElementById("simulation").onselectstart = function () {return false;};
+                document.getElementById("gradient").onselectstart = function () {return false;};
                 
                 init();
             });
@@ -188,11 +195,8 @@
                     Death rate:
                     <span class ="remark" id="diminishment"></span><br/>
                     <div id="sld_diminishment" class="slider"></div>
-                    <!--p style="text-align:right">
-                        <input type="button" value="Colors..." id="choose-colors"/>
-                    </p-->
                     Colors:
-                    <div id="gradient"></div>
+                    <div id="gradient" style=""></div>
                 </form>
             </section>
         </aside>
