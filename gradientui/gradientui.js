@@ -24,12 +24,13 @@
         this.position = position;
         this.color = color;
         this.dragging = false;
+        this.moved = false;
         this.oldleft = undefined
         this.mousedownx = undefined;
         this.$this.css("left", this.position*this.width);
         this.$this.css("background-color", this.color);
         
-        this.$this.bind("dblclick.dragger", {this : this}, function(event){event.data.this.click(event)});
+        this.$this.bind("click.dragger", {this : this}, function(event){event.data.this.click(event)});
         this.$this.bind("mousedown.dragger", {this : this}, function(event){event.data.this.mousedown(event)});
         $(window).bind("mouseup.dragger", {this : this}, function(event){event.data.this.mouseup(event)});
         $(window).bind("mousemove.dragger", {this : this}, function(event){event.data.this.mousemove(event)});
@@ -37,6 +38,9 @@
     
     Dragger.prototype.click = function(event)
     {
+        if(this.moved)
+            return;
+
         var aux = this;
         colorPicker.exportColor = function()
         {
@@ -57,6 +61,7 @@
         this.oldleft = parseInt(this.$this.css("left"), 10);
         this.mousedownx = event.pageX;
         this.dragging = true;
+        this.moved = false;
     }
     
     Dragger.prototype.mouseup = function(event)
@@ -75,6 +80,8 @@
         this.position = newleft / this.width;
         this.$this.css("left", newleft);
         this.parent.redraw();
+
+        this.moved = true;
     }
     
     var Gradient = function(parent, values)
