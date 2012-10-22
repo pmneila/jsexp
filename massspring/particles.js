@@ -193,8 +193,8 @@ function Spring(p1, p2)
 
 function init()
 {
-	init_controls();
-	
+    init_controls();
+    
     canvas = document.getElementById("myCanvas");
     simulation = document.getElementById("simulation");
     canvas.onmousedown = onMouseDown;
@@ -441,37 +441,37 @@ function worldToForm()
 
 function init_controls()
 {
-	$("#sld_air_friction").slider({
-		value: 0.05, min: -0.05, max:1, step:0.05,
-		change: function(event, ui) {$("#airFriction").html(ui.value); airFriction = ui.value;},
-		slide: function(event, ui) {$("#airFriction").html(ui.value); airFriction = ui.value;}
-	});
-	$("#sld_floor_friction").slider({
-		value: 0.8, min: -0.1, max:1, step:0.05,
-		change: function(event, ui) {$("#floorFriction").html(ui.value); floorFriction = ui.value;},
-		slide: function(event, ui) {$("#floorFriction").html(ui.value); floorFriction = ui.value;}
-	});
-	$("#sld_gravity").slider({
-		value: 9.8, min: -10, max:40, step:0.1,
-		change: function(event, ui) {$("#gravity").html(ui.value); gravity = ui.value;},
-		slide: function(event, ui) {$("#gravity").html(ui.value); gravity = ui.value;}
-	});
-	$("#sld_mass").slider({
-		value: 0.1, min: 0.1, max:2, step:0.1,
-		change: function(event, ui) {$("#mass").html(ui.value); particleMass = ui.value;},
-		slide: function(event, ui) {$("#mass").html(ui.value); particleMass = ui.value;}
-	});
-	$("#sld_length").slider({
-		value: 100, min: 20, max:150, step:1,
-		change: function(event, ui) {$("#length").html(ui.value); springLength = ui.value;},
-		slide: function(event, ui) {$("#length").html(ui.value); springLength = ui.value;}
-	});
-	$("#sld_stiffness").slider({
-		value: 0.5, min: 0.1, max:2, step:0.1,
-		change: function(event, ui) {$("#stiffness").html(ui.value); springStiffness = ui.value;},
-		slide: function(event, ui) {$("#stiffness").html(ui.value); springStiffness = ui.value;}
-	});
-	//$("#btn_reset").button();
+    $("#sld_air_friction").slider({
+        value: 0.05, min: -0.05, max:1, step:0.05,
+        change: function(event, ui) {$("#airFriction").html(ui.value); airFriction = ui.value;},
+        slide: function(event, ui) {$("#airFriction").html(ui.value); airFriction = ui.value;}
+    });
+    $("#sld_floor_friction").slider({
+        value: 0.8, min: -0.1, max:1, step:0.05,
+        change: function(event, ui) {$("#floorFriction").html(ui.value); floorFriction = ui.value;},
+        slide: function(event, ui) {$("#floorFriction").html(ui.value); floorFriction = ui.value;}
+    });
+    $("#sld_gravity").slider({
+        value: 9.8, min: -10, max:40, step:0.1,
+        change: function(event, ui) {$("#gravity").html(ui.value); gravity = ui.value;},
+        slide: function(event, ui) {$("#gravity").html(ui.value); gravity = ui.value;}
+    });
+    $("#sld_mass").slider({
+        value: 0.1, min: 0.1, max:2, step:0.1,
+        change: function(event, ui) {$("#mass").html(ui.value); particleMass = ui.value;},
+        slide: function(event, ui) {$("#mass").html(ui.value); particleMass = ui.value;}
+    });
+    $("#sld_length").slider({
+        value: 100, min: 20, max:150, step:1,
+        change: function(event, ui) {$("#length").html(ui.value); springLength = ui.value;},
+        slide: function(event, ui) {$("#length").html(ui.value); springLength = ui.value;}
+    });
+    $("#sld_stiffness").slider({
+        value: 0.5, min: 0.1, max:2, step:0.1,
+        change: function(event, ui) {$("#stiffness").html(ui.value); springStiffness = ui.value;},
+        slide: function(event, ui) {$("#stiffness").html(ui.value); springStiffness = ui.value;}
+    });
+    //$("#btn_reset").button();
 }
 
 function showScale()

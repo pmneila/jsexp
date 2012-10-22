@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mass-spring simulation</title>
+        <link rel="stylesheet" type="text/css" href="../css/experiments.css"/>
+        <link type="text/css" href="../3rd/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+        <script type="text/javascript" src="../3rd/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="../3rd/jquery-ui-1.8.16.custom.min.js"></script>
+        <script type="text/javascript" src="particles.js"></script>
+        <script type="text/javascript" src="scenes.js"></script>
+        <meta charset="UTF-8">
+        <script>
+            $(function() {
+                init();
+            });
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>Mass-spring simulation</h1>
+        </header>
+        <div id="simulation">
+            <canvas id="myCanvas" width="1000" height="500"></canvas>
+            <aside class="panel">
+                <section id="instructions">
+                    <header><h4>Instructions</h4></header>
+                    <ol>
+                        <li>Change the scene with the controls below.</li>
+                        <li>Use the <span class="remark">left mouse button</span>
+                            to drag particles.</li>
+                        <li>Use the <span class="remark">middle mouse button</span>
+                            to pin/unpin particles.</li>
+                    </ol>
+                </section>
+                <section id="controls">
+                    <!--header><h4>Controls</h4></header-->
+                    <form name="ex">
+                        Scene: <select name="scene"
+                            onchange="eval(&#39;load&#39;+document.ex.scene.options[document.ex.scene.selectedIndex].value+&#39;()&#39;)">
+                            <option value="Pentagon" selected="selected">Pentagon</option>
+                            <option value="Hexagon">Hexagon</option>
+                            <option value="Fabric">Elastic fabric</option>
+                            <option value="Fabric2">Elastic fabric v2</option>
+                            <option value="Polygons">Polygons</option>
+                        </select>
+                        <input id="btn_reset" type="button" value="Reset" 
+                            onclick="eval(&#39;load&#39;+document.ex.scene.options[document.ex.scene.selectedIndex].value+&#39;()&#39;)">
+                        </input>
+                    <br/>
+                    <abbr title="Simulate ice setting this parameter to 0. You can set a negative friction too.">Floor friction</abbr>:
+                    <span class ="remark" id="floorFriction"></span>
+                    <div id="sld_floor_friction" class="slider"></div>
+                    
+                    Air friction:
+                    <span class ="remark" id="airFriction"></span>
+                    <div id="sld_air_friction" class="slider"></div>
+                    
+                    Gravity:
+                    <span class ="remark" id="gravity"></span>
+                    <div id="sld_gravity" class="slider"></div>
+                    
+                    <span class="unsafe"><abbr title="This is an unsafe parameter. Some values might make the simulation diverge. Use with caution.">Particle mass</abbr>:</span>
+                    <span class ="remark" id="mass"></span>
+                    <div id="sld_mass" class="slider"></div>
+                
+                    <span class="unsafe"><abbr title="This is an unsafe parameter. Some values might make the simulation diverge. Use with caution.">Spring length</abbr>:</span>
+                    <span class="remark" id="length"></span>
+                    <div id="sld_length" class="slider"></div>
+                
+                    <span class="unsafe"><abbr title="This is an unsafe parameter. Some values might make the simulation diverge. Use with caution.">Spring stiffness</abbr>:</span>
+                    <span class="remark" id="stiffness"></span>
+                    <div id="sld_stiffness" class="slider"></div-->
+        </form>
+                </section>
+            </aside>
+        </div>
+        <footer>
+            <div id="copyright">
+                <footer>&copy;2010 pmneila</footer>
+            </div>
+        </footer>
+    </body>
+</html>
