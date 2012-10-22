@@ -72,12 +72,12 @@ Some screenshots of the application.
   :target: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/wormsx.png
 
 
-`Particles <http://pmneila.github.com/jsexp/particles/>`_
+`Particles <http://pmneila.github.com/jsexp/massspring/>`_
 =========================================================
 
-`Particles <http://pmneila.github.com/jsexp/particles/>`_
+`Particles <http://pmneila.github.com/jsexp/massspring/>`_
 is a simple mass-spring physics simulation.
 
-.. image:: https://github.com/pmneila/jsexp/raw/master/particles/particles.png
+.. image:: https://github.com/pmneila/jsexp/raw/master/massspring/particles.png
    :align: center
-   :target: http://pmneila.github.com/jsexp/particles
+   :target: http://pmneila.github.com/jsexp/massspring
