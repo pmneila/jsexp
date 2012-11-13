@@ -25,6 +25,7 @@ var mCamera;
 var mUniforms;
 var mColors;
 var mColorsNeedUpdate = true;
+var mLastTime = 0;
 
 var mTexture1, mTexture2;
 var mGSMaterial, mScreenMaterial;
@@ -157,13 +158,20 @@ init = function()
     
     render(0);
     mUniforms.brush.value = new THREE.Vector2(0.5, 0.5);
+    mLastTime = new Date().getTime();
     requestAnimationFrame(render);
 }
 
 var render = function(time)
 {
+    var dt = (time - mLastTime)/20.0;
+    //console.log(dt);
+    if(dt > 0.7 || dt==0)
+        var dt = 0.7;
+    mLastTime = time;
+    
     mScreenQuad.material = mGSMaterial;
-    mUniforms.delta.value = 0.8;
+    mUniforms.delta.value = dt;
     mUniforms.feed.value = feed;
     mUniforms.kill.value = kill;
     
