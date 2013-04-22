@@ -165,8 +165,8 @@ init = function()
 var render = function(time)
 {
     var dt = (time - mLastTime)/20.0;
-    if(dt > 0.8 || dt==0)
-        var dt = 0.8;
+    if(dt > 0.8 || dt<=0)
+        dt = 0.8;
     mLastTime = time;
     
     mScreenQuad.material = mGSMaterial;
