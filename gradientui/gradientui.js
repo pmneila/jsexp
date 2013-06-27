@@ -84,6 +84,22 @@
         this.moved = true;
     }
     
+    Dragger.prototype.setPosition = function(pos)
+    {
+        pos = clamp(pos, 0.0, 1.0);
+        var newleft = pos*this.width;
+        
+        this.$this.css("left", newleft);
+        this.position = pos;
+    }
+    
+    Dragger.prototype.setColor = function(color)
+    {
+        this.color = color;
+        this.$this.css("background-color", color);
+        this.parent.redraw();
+    }
+    
     var Gradient = function(parent, values)
     {
         this.$this = parent;
@@ -118,15 +134,21 @@
     {
         var aux = this.draggers.map(function(a){return [a.position, a.color];});
         aux.sort(function(a,b){return a[0]-b[0];});
-        this.values = aux;
         
-        this.valuesRGBS = aux.map(function(a){
-            var rgb = hexToRgb(a[1]);
-            return [rgb.r, rgb.g, rgb.b, a[0]]
-        });
+        this.values = aux;
         
         if(this.callback !== undefined)
             this.callback.fn(this.callback.data);
+    }
+    
+    Gradient.prototype.setValues = function(values)
+    {
+        this.values = values;
+        for (var i = values.length - 1; i >= 0; i--) {
+            var v = values[i];
+            this.draggers[i].setPosition(v[0]);
+            this.draggers[i].setColor(v[1]);
+        };
     }
     
     Gradient.prototype.redraw = function()
@@ -168,8 +190,22 @@
             });
         },
         
+        getValuesRGBS : function() {
+            
+            var values = $(this).data("gradient").values;
+            var valuesRGBS = values.map(function(a){
+                var rgb = hexToRgb(a[1]);
+                return [rgb.r, rgb.g, rgb.b, a[0]]
+            });
+            return valuesRGBS;
+        },
+        
+        setValues : function(values) {
+            $(this).data("gradient").setValues(values);
+        },
+        
         getValues : function() {
-            return $(this).data("gradient").valuesRGBS;
+            return $(this).data("gradient").values;
         },
         
         setUpdateCallback : function(callback, data) {

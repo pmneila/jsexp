@@ -211,7 +211,7 @@ loadPreset = function(idx)
 
 var updateUniformsColors = function()
 {
-    var values = $("#gradient").gradient("getValues");
+    var values = $("#gradient").gradient("getValuesRGBS");
     for(var i=0; i<values.length; i++)
     {
         var v = values[i];
@@ -224,6 +224,7 @@ var updateUniformsColors = function()
 var onUpdatedColor = function()
 {
     mColorsNeedUpdate = true;
+    updateShareString();
 }
 
 var onMouseMove = function(e)
@@ -271,16 +272,89 @@ var init_controls = function()
 {
 	$("#sld_replenishment").slider({
 		value: feed, min: 0, max:0.1, step:0.001,
-		change: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value;},
-		slide: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value;}
+		change: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value; updateShareString();},
+		slide: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value; updateShareString();}
 	});
 	$("#sld_replenishment").slider("value", feed);
 	$("#sld_diminishment").slider({
 		value: kill, min: 0, max:0.073, step:0.001,
-		change: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value;},
-		slide: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value;}
+		change: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value; updateShareString();},
+		slide: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value; updateShareString();}
 	});
 	$("#sld_diminishment").slider("value", kill);
+    
+    $('#share').keypress(function (e) {
+        if (e.which == 13) {
+            parseShareString();
+            return false;
+        }
+    });
+}
+
+alertInvalidShareString = function()
+{
+    $("#share").val("Invalid string!");
+    setTimeout(updateShareString, 1000);
+}
+
+parseShareString = function()
+{
+    var str = $("#share").val();
+    var fields = str.split(",");
+    
+    if(fields.length != 12)
+    {
+        alertInvalidShareString();
+        return;
+    }
+    
+    var newFeed = parseFloat(fields[0]);
+    var newKill = parseFloat(fields[1]);
+    
+    if(isNaN(newFeed) || isNaN(newKill))
+    {
+        alertInvalidShareString();
+        return;
+    }
+    
+    var newValues = [];
+    for(var i=0; i<5; i++)
+    {
+        var v = [parseFloat(fields[2+2*i]), fields[2+2*i+1]];
+        
+        if(isNaN(v[0]))
+        {
+            alertInvalidShareString();
+            return;
+        }
+        
+        // Check if the string is a valid color.
+        if(! /^#[0-9A-F]{6}$/i.test(v[1]))
+        {
+            alertInvalidShareString();
+            return;
+        }
+        
+        newValues.push(v);
+    }
+    
+    $("#gradient").gradient("setValues", newValues);
+    feed = newFeed;
+    kill = newKill;
+    worldToForm();
+}
+
+updateShareString = function()
+{
+    var str = "".concat(feed, ",", kill);
+    
+    var values = $("#gradient").gradient("getValues");
+    for(var i=0; i<values.length; i++)
+    {
+        var v = values[i];
+        str += "".concat(",", v[0], ",", v[1]);
+    }
+    $("#share").val(str);
 }
 
 })();
