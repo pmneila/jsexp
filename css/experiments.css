@@ -11,6 +11,11 @@ header, footer, aside, nav {
     display: block;
 }
 
+a:link {color:#777777;}
+a:visited {color:#777777;}
+a:hover {color:#999999;}
+a:active {color:#ffffff;}
+
 #copyright {
     font-size:8pt;
     text-align:center;
