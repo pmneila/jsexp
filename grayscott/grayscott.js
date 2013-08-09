@@ -1,4 +1,3 @@
-
 /* 
  * Gray-Scott
  *
@@ -94,6 +93,10 @@ init = function()
     init_controls();
     
     canvas = document.getElementById("myCanvas");
+    
+    canvasWidth = canvas.clientWidth; // use actual canvas width
+    canvasHeight = canvas.clientHeight; // use actual canvas height
+
     // Fix a bug in the mouse behavior in Firefox.
     simulation = document.getElementById("simulation");
     
@@ -230,8 +233,9 @@ var onUpdatedColor = function()
 var onMouseMove = function(e)
 {
     var ev = e ? e : window.event;
-    mMouseX = Math.round(ev.clientX - simulation.offsetLeft);
-    mMouseY = Math.round(ev.clientY - simulation.offsetTop);
+    
+    mMouseX = ev.pageX - ev.target.offsetLeft; // these offsets work with
+    mMouseY = ev.pageY - ev.target.offsetTop; //  scrolled documents too
     
     if(mMouseDown)
         mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
@@ -259,6 +263,73 @@ snapshot = function()
 {
     var dataURL = canvas.toDataURL("image/png");
     window.open(dataURL, "name-"+Math.random());
+}
+
+// resize canvas to fullscreen, scroll to upper left 
+// corner and try to enable fullscreen mode and vice-versa
+fullscreen = function() {
+
+	var canv = $('#myCanvas');
+	var elem = canv.get(0);
+
+	// old size known -> resize to small version
+	if( window.oldCanvSize ) {
+	
+		// restore old canvas size
+		canv.width(window.oldCanvSize.width);
+		canv.height(window.oldCanvSize.height);
+		
+		// forget old size
+		delete(window.oldCanvSize);
+		
+		// end fullscreen
+		if (elem.cancelFullscreen) {
+			elem.cancelFullscreen();
+		} else if (document.mozCancelFullScreen) {
+			document.mozCancelFullScreen();
+		} else if (document.webkitCancelFullScreen) {
+			document.webkitCancelFullScreen();
+		}	
+
+		// restart blank
+		init();
+		clean();
+				
+		return;
+		
+	} // if( window.oldCanvSize ) 
+	
+	// transition to fullscreen ?
+	if (screen.width != canv.width()) {
+
+		// save current dimensions as old
+		window.oldCanvSize = {
+			width : canv.width(), 
+			height: canv.height()
+		};
+
+		// adjust canvas to screen size
+		canv.width(screen.width);
+		canv.height(screen.height);
+	
+		// scroll to upper left corner
+		$('html, body').scrollTop( canv.offset().top);
+		$('html, body').scrollLeft( canv.offset().left);
+		 
+		// request fullscreen in different flavours
+		if (elem.requestFullscreen) {
+			elem.requestFullscreen();
+		} else if (elem.mozRequestFullScreen) {
+			elem.mozRequestFullScreen();
+		} else if (elem.webkitRequestFullscreen) {
+			elem.webkitRequestFullscreen();
+		}
+		
+	} // if (screen.width != canv.width()) 
+		
+	init();
+	clean();
+	
 }
 
 var worldToForm = function()
