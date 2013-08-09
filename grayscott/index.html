@@ -167,7 +167,7 @@
                 </ol>
             </section>
             <section id="controls">
-                <header><h4>Controls</h4></header>
+                
                 <form name="ex">
                         Presets: <select name="scene"
                             onchange="loadPreset(document.ex.scene.selectedIndex)">
@@ -186,6 +186,7 @@
                     <p style="text-align:right">
                         <input type="button" value="Clear" onclick="clean()"/>
                         <input type="button" value="Take snapshot" onclick="snapshot()"/>
+                        <input type="button" value="Fullscreen" accesskey="f" onclick="fullscreen()"/>
                     <p/>
                     <h4 class="unsafe">Advanced settings</h4>
                     Feed rate:
