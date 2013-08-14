@@ -183,22 +183,22 @@
                             <option value="9">Waves</option>
                             <option value="10">The U-Skate world</option>
                         </select>
-                    <p style="text-align:right">
-                        <input type="button" value="Clear" onclick="clean()"/>
-                        <input type="button" value="Take snapshot" onclick="snapshot()"/>
-                        <input type="button" value="Fullscreen" accesskey="f" onclick="fullscreen()"/>
-                    <p/>
-                    <h4 class="unsafe">Advanced settings</h4>
-                    Feed rate:
-                    <span class="remark" id="replenishment"></span><br/>
-                    <div id="sld_replenishment" class="slider"></div>
-                    
-                    Death rate:
-                    <span class ="remark" id="diminishment"></span><br/>
-                    <div id="sld_diminishment" class="slider"></div>
-                    Colors:
-                    <div id="gradient" style=""></div>
                 </form>
+                <p style="text-align:right">
+                    <button id="btn_clear" onclick="clean()">Clear</button>
+                    <button id="btn_snapshot" onclick="snapshot()">Take snapshot</button>
+                    <button id="btn_fullscreen" onclick="fullscreen()">Fullscreen mode</button>
+                <p/>
+                <h4 class="unsafe">Advanced settings</h4>
+                Feed rate:
+                <span class="remark" id="replenishment"></span><br/>
+                <div id="sld_replenishment" class="slider"></div>
+                
+                Death rate:
+                <span class ="remark" id="diminishment"></span><br/>
+                <div id="sld_diminishment" class="slider"></div>
+                Colors:
+                <div id="gradient" style=""></div>
                 <div style="font-size:x-small">Share (paste and press enter):</div>
                 <div style="text-align:center"><input id="share" style="width:85%"/></div>
             </section>

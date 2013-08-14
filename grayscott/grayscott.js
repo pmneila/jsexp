@@ -11,9 +11,9 @@
 
 // Canvas.
 var canvas;
-var simulation;
-var canvasWidth = 1024;
-var canvasHeight = 512;
+var canvasQ;
+var canvasWidth;
+var canvasHeight;
 
 var mMouseX, mMouseY;
 var mMouseDown = false;
@@ -92,50 +92,29 @@ init = function()
 {
     init_controls();
     
-    canvas = document.getElementById("myCanvas");
-    
-    canvasWidth = canvas.clientWidth; // use actual canvas width
-    canvasHeight = canvas.clientHeight; // use actual canvas height
-
-    // Fix a bug in the mouse behavior in Firefox.
-    simulation = document.getElementById("simulation");
+    canvasQ = $('#myCanvas');
+    canvas = canvasQ.get(0);
     
     canvas.onmousedown = onMouseDown;
     canvas.onmouseup = onMouseUp;
     canvas.onmousemove = onMouseMove;
     
     mRenderer = new THREE.WebGLRenderer({canvas: canvas, preserveDrawingBuffer: true});
-    mRenderer.setSize(canvasWidth, canvasHeight);
-    
+
     mScene = new THREE.Scene();
-    mCamera = new THREE.OrthographicCamera(canvasWidth/-2, canvasWidth/2, canvasHeight/2, canvasHeight/-2, -10000, 10000);
+    mCamera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, -10000, 10000);
     mCamera.position.z = 100;
     mScene.add(mCamera);
     
-    mTexture1 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
-                        {minFilter: THREE.LinearFilter,
-                         magFilter: THREE.LinearFilter,
-                         format: THREE.RGBFormat,
-                         type: THREE.FloatType});
-    mTexture2 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
-                        {minFilter: THREE.LinearFilter,
-                         magFilter: THREE.LinearFilter,
-                         format: THREE.RGBFormat,
-                         type: THREE.FloatType});
-    mTexture1.wrapS = THREE.RepeatWrapping;
-    mTexture1.wrapT = THREE.RepeatWrapping;
-    mTexture2.wrapS = THREE.RepeatWrapping;
-    mTexture2.wrapT = THREE.RepeatWrapping;
-    
     mUniforms = {
-        screenWidth: {type: "f", value: canvasWidth/2},
-        screenHeight: {type: "f", value: canvasHeight/2},
-        tSource: {type: "t", value: mTexture1},
+        screenWidth: {type: "f", value: undefined},
+        screenHeight: {type: "f", value: undefined},
+        tSource: {type: "t", value: undefined},
         delta: {type: "f", value: 1.0},
         feed: {type: "f", value: feed},
         kill: {type: "f", value: kill},
         brush: {type: "v2", value: new THREE.Vector2(-10, -10)},
-        color1: {type: "v4", value: new THREE.Vector4(0, 0, 0.2, 0)},
+        color1: {type: "v4", value: new THREE.Vector4(0, 0, 0.0, 0)},
         color2: {type: "v4", value: new THREE.Vector4(0, 1, 0, 0.2)},
         color3: {type: "v4", value: new THREE.Vector4(1, 1, 0, 0.21)},
         color4: {type: "v4", value: new THREE.Vector4(1, 0, 0, 0.4)},
@@ -155,14 +134,50 @@ init = function()
                 fragmentShader: document.getElementById('screenFragmentShader').textContent,
             });
     
-    var plane = new THREE.PlaneGeometry(canvasWidth, canvasHeight);
+    var plane = new THREE.PlaneGeometry(1.0, 1.0);
     mScreenQuad = new THREE.Mesh(plane, mScreenMaterial);
     mScene.add(mScreenQuad);
+    
+    mColorsNeedUpdate = true;
+    
+    resize(canvas.clientWidth, canvas.clientHeight);
     
     render(0);
     mUniforms.brush.value = new THREE.Vector2(0.5, 0.5);
     mLastTime = new Date().getTime();
     requestAnimationFrame(render);
+}
+
+var resize = function(width, height)
+{
+    // Set the new shape of canvas.
+    canvasQ.width(width);
+    canvasQ.height(height);
+    
+    // Get the real size of canvas.
+    canvasWidth = canvasQ.width();
+    canvasHeight = canvasQ.height();
+    
+    mRenderer.setSize(canvasWidth, canvasHeight);
+    
+    // TODO: Possible memory leak?
+    mTexture1 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
+                        {minFilter: THREE.LinearFilter,
+                         magFilter: THREE.LinearFilter,
+                         format: THREE.RGBFormat,
+                         type: THREE.FloatType});
+    mTexture2 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
+                        {minFilter: THREE.LinearFilter,
+                         magFilter: THREE.LinearFilter,
+                         format: THREE.RGBFormat,
+                         type: THREE.FloatType});
+    mTexture1.wrapS = THREE.RepeatWrapping;
+    mTexture1.wrapT = THREE.RepeatWrapping;
+    mTexture2.wrapS = THREE.RepeatWrapping;
+    mTexture2.wrapT = THREE.RepeatWrapping;
+    
+    mUniforms.screenWidth.value = canvasWidth/2;
+    mUniforms.screenHeight.value = canvasHeight/2;
 }
 
 var render = function(time)
@@ -234,8 +249,8 @@ var onMouseMove = function(e)
 {
     var ev = e ? e : window.event;
     
-    mMouseX = ev.pageX - ev.target.offsetLeft; // these offsets work with
-    mMouseY = ev.pageY - ev.target.offsetTop; //  scrolled documents too
+    mMouseX = ev.pageX - canvasQ.offset().left; // these offsets work with
+    mMouseY = ev.pageY - canvasQ.offset().top; //  scrolled documents too
     
     if(mMouseDown)
         mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
@@ -269,68 +284,59 @@ snapshot = function()
 // corner and try to enable fullscreen mode and vice-versa
 fullscreen = function() {
 
-	var canv = $('#myCanvas');
-	var elem = canv.get(0);
-
-	// old size known -> resize to small version
-	if( window.oldCanvSize ) {
-	
-		// restore old canvas size
-		canv.width(window.oldCanvSize.width);
-		canv.height(window.oldCanvSize.height);
-		
-		// forget old size
-		delete(window.oldCanvSize);
-		
-		// end fullscreen
-		if (elem.cancelFullscreen) {
-			elem.cancelFullscreen();
-		} else if (document.mozCancelFullScreen) {
-			document.mozCancelFullScreen();
-		} else if (document.webkitCancelFullScreen) {
-			document.webkitCancelFullScreen();
-		}	
-
-		// restart blank
-		init();
-		clean();
-				
-		return;
-		
-	} // if( window.oldCanvSize ) 
-	
-	// transition to fullscreen ?
-	if (screen.width != canv.width()) {
-
-		// save current dimensions as old
-		window.oldCanvSize = {
-			width : canv.width(), 
-			height: canv.height()
-		};
-
-		// adjust canvas to screen size
-		canv.width(screen.width);
-		canv.height(screen.height);
-	
-		// scroll to upper left corner
-		$('html, body').scrollTop( canv.offset().top);
-		$('html, body').scrollLeft( canv.offset().left);
-		 
-		// request fullscreen in different flavours
-		if (elem.requestFullscreen) {
-			elem.requestFullscreen();
-		} else if (elem.mozRequestFullScreen) {
-			elem.mozRequestFullScreen();
-		} else if (elem.webkitRequestFullscreen) {
-			elem.webkitRequestFullscreen();
-		}
-		
-	} // if (screen.width != canv.width()) 
-		
-	init();
-	clean();
-	
+    var canv = $('#myCanvas');
+    var elem = canv.get(0);
+    
+    if(isFullscreen())
+    {
+        // end fullscreen
+        if (elem.cancelFullscreen) {
+            elem.cancelFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitCancelFullScreen) {
+            document.webkitCancelFullScreen();
+        }
+    }
+    
+    if(!isFullscreen())
+    {
+        // save current dimensions as old
+        window.oldCanvSize = {
+            width : canv.width(), 
+            height: canv.height()
+        };
+        
+        // adjust canvas to screen size
+        resize(screen.width, screen.height);
+        
+        // scroll to upper left corner
+        $('html, body').scrollTop(canv.offset().top);
+        $('html, body').scrollLeft(canv.offset().left);
+        
+        // request fullscreen in different flavours
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        }
+    }
 }
+
+var isFullscreen = function()
+{
+    return document.mozFullScreenElement ||
+        document.webkitCurrentFullScreenElement ||
+        document.fullscreenElement;
+}
+
+$(document).bind('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(ev) {
+    // restore old canvas size
+    if(!isFullscreen())
+        resize(window.oldCanvSize.width, window.oldCanvSize.height);
+});
 
 var worldToForm = function()
 {
@@ -341,24 +347,37 @@ var worldToForm = function()
 
 var init_controls = function()
 {
-	$("#sld_replenishment").slider({
-		value: feed, min: 0, max:0.1, step:0.001,
-		change: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value; updateShareString();},
-		slide: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value; updateShareString();}
-	});
-	$("#sld_replenishment").slider("value", feed);
-	$("#sld_diminishment").slider({
-		value: kill, min: 0, max:0.073, step:0.001,
-		change: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value; updateShareString();},
-		slide: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value; updateShareString();}
-	});
-	$("#sld_diminishment").slider("value", kill);
+    $("#sld_replenishment").slider({
+        value: feed, min: 0, max:0.1, step:0.001,
+        change: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value; updateShareString();},
+        slide: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value; updateShareString();}
+    });
+    $("#sld_replenishment").slider("value", feed);
+    $("#sld_diminishment").slider({
+        value: kill, min: 0, max:0.073, step:0.001,
+        change: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value; updateShareString();},
+        slide: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value; updateShareString();}
+    });
+    $("#sld_diminishment").slider("value", kill);
     
     $('#share').keypress(function (e) {
         if (e.which == 13) {
             parseShareString();
             return false;
         }
+    });
+    
+    $("#btn_clear").button({
+        icons : {primary : "ui-icon-document"},
+        text : false
+    });
+    $("#btn_snapshot").button({
+        icons : {primary : "ui-icon-image"},
+        text : false
+    });
+    $("#btn_fullscreen").button({
+        icons : {primary : "ui-icon-arrow-4-diag"},
+        text : false
     });
 }
 
