@@ -66,6 +66,10 @@ var presets = [
         feed: 0.026,
         kill: 0.051
     },
+    { // Chaos and holes (by clem)
+        feed: 0.034,
+        kill: 0.056
+    },
     { // Moving spots.
         feed: 0.014,
         kill: 0.054
