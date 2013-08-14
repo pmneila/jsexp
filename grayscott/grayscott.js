@@ -383,6 +383,13 @@ var init_controls = function()
         icons : {primary : "ui-icon-arrow-4-diag"},
         text : false
     });
+    
+    $("#notworking").click(function(){
+        $("#requirement_dialog").dialog("open");
+    });
+    $("#requirement_dialog").dialog({
+        autoOpen: false
+    });
 }
 
 alertInvalidShareString = function()
