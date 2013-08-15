@@ -167,25 +167,26 @@
                 </ol>
             </section>
             <section id="controls">
-                
+                <!--header><h4>Controls</h4></header-->
                 <form name="ex">
-                        Presets: <select name="scene"
-                            onchange="loadPreset(document.ex.scene.selectedIndex)">
-                            <option value="0" selected="selected">Default</option>
-                            <option value="1">Solitons</option>
-                            <option value="2">Pulsating solitons</option>
-                            <option value="3">Worms</option>
-                            <option value="4">Mazes</option>
-                            <option value="5">Holes</option>
-                            <option value="6">Chaos</option>
-                            <option value="7">Chaos and holes</option>
-                            <option value="8">Moving spots</option>
-                            <option value="9">Spots and loops</option>
-                            <option value="10">Waves</option>
-                            <option value="11">The U-Skate world</option>
-                        </select>
+                    Presets:
+                    <select name="scene" style="width:100%"
+                        onchange="loadPreset(document.ex.scene.selectedIndex)">
+                        <option value="0" selected="selected">Default</option>
+                        <option value="1">Solitons</option>
+                        <option value="2">Pulsating solitons</option>
+                        <option value="3">Worms</option>
+                        <option value="4">Mazes</option>
+                        <option value="5">Holes</option>
+                        <option value="6">Chaos</option>
+                        <option value="7">Chaos and holes</option>
+                        <option value="8">Moving spots</option>
+                        <option value="9">Spots and loops</option>
+                        <option value="10">Waves</option>
+                        <option value="11">The U-Skate world</option>
+                    </select>
                 </form>
-                <p style="text-align:right">
+                <p style="text-align:center">
                     <button id="btn_clear" onclick="clean()">Clear</button>
                     <button id="btn_snapshot" onclick="snapshot()">Take snapshot</button>
                     <button id="btn_fullscreen" onclick="fullscreen()">Fullscreen mode</button>
