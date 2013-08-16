@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Reaction diffusion simulation</title>
+        <link rel="stylesheet" type="text/css" href="../css/experiments.css"/>
+        <link rel="stylesheet" type="text/css" href="../gradientui/gradientui.css"/>
+        <link type="text/css" href="../3rd/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+        <script type="text/javascript" src="../3rd/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="../3rd/jquery-ui-1.8.16.custom.min.js"></script>
+        <script type="text/javascript" src="../3rd/colorPicker.js"></script>
+        <script type="text/javascript" src="../3rd/three.min.js"></script>
+        <script type="text/javascript" src="../gradientui/gradientui.js"></script>
+        <!--script type="text/javascript" src="http://mrdoob.github.com/three.js/build/three.min.js"></script-->
+        <script type="x-shader/x-vertex" id="standardVertexShader">
+            varying vec2 vUv;
+            
+            void main()
+            {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        </script>
+        <script type="x-shader/x-fragment" id="gsFragmentShader">
+            varying vec2 vUv;
+            uniform float screenWidth;
+            uniform float screenHeight;
+            uniform sampler2D tSource;
+            uniform float delta;
+            uniform sampler2D feed_texture;
+            uniform float kill;
+            uniform vec2 brush;
+            
+            vec2 texel = vec2(1.0/screenWidth, 1.0/screenHeight);
+            float step_x = 1.0/screenWidth;
+            float step_y = 1.0/screenHeight;
+            
+            void main()
+            {
+                if(brush.x < -5.0)
+                {
+                    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                    return;
+                }
+                
+                float feed = texture2D(feed_texture, vUv).r * 0.1;
+                //float kill = vUv.x * 0.073;
+                
+                vec2 uv = texture2D(tSource, vUv).rg;
+                vec2 uv0 = texture2D(tSource, vUv+vec2(-step_x, 0.0)).rg;
+                vec2 uv1 = texture2D(tSource, vUv+vec2(step_x, 0.0)).rg;
+                vec2 uv2 = texture2D(tSource, vUv+vec2(0.0, -step_y)).rg;
+                vec2 uv3 = texture2D(tSource, vUv+vec2(0.0, step_y)).rg;
+                
+                vec2 lapl = (uv0 + uv1 + uv2 + uv3 - 4.0*uv);//10485.76;
+                float du = /*0.00002*/0.2097*0.5*lapl.r - uv.r*uv.g*uv.g + feed*(1.0 - uv.r);
+                float dv = /*0.00001*/0.105*0.5*lapl.g + uv.r*uv.g*uv.g - (feed+kill)*uv.g;
+                vec2 dst = uv + delta*vec2(du, dv);
+                
+                if(brush.x > 0.0)
+                {
+                    vec2 diff = (vUv - brush)/texel;
+                    float dist = dot(diff, diff);
+                    if(dist < 5.0)
+                        dst.g = 0.9;
+                }
+                
+                gl_FragColor = vec4(dst.r, dst.g, 0.0, 1.0);
+            }
+        </script>
+        <script type="x-shader/x-fragment" id="screenFragmentShader">
+            varying vec2 vUv;
+            uniform float screenWidth;
+            uniform float screenHeight;
+            uniform sampler2D tSource;
+            uniform float delta;
+            uniform sampler2D feed_texture;
+            uniform float kill;
+            uniform vec4 color1;
+            uniform vec4 color2;
+            uniform vec4 color3;
+            uniform vec4 color4;
+            uniform vec4 color5;
+            
+            vec2 texel = vec2(1.0/screenWidth, 1.0/screenHeight);
+            
+            void main()
+            {
+                float value = texture2D(tSource, vUv).g;
+                //int step = int(floor(value));
+                //float a = fract(value);
+                float a;
+                vec3 col;
+                
+                if(value <= color1.a)
+                    col = color1.rgb;
+                if(value > color1.a && value <= color2.a)
+                {
+                    a = (value - color1.a)/(color2.a - color1.a);
+                    col = mix(color1.rgb, color2.rgb, a);
+                }
+                if(value > color2.a && value <= color3.a)
+                {
+                    a = (value - color2.a)/(color3.a - color2.a);
+                    col = mix(color2.rgb, color3.rgb, a);
+                }
+                if(value > color3.a && value <= color4.a)
+                {
+                    a = (value - color3.a)/(color4.a - color3.a);
+                    col = mix(color3.rgb, color4.rgb, a);
+                }
+                if(value > color4.a && value <= color5.a)
+                {
+                    a = (value - color4.a)/(color5.a - color4.a);
+                    col = mix(color4.rgb, color5.rgb, a);
+                }
+                if(value > color5.a)
+                    col = color5.rgb;
+                
+            	gl_FragColor = vec4(col.r, col.g, col.b, 1.0);
+                //gl_FragColor = texture2D(feed_texture, vUv);
+            }
+        </script>
+        <script type="text/javascript" src="lena.js"></script>
+        <script type="text/javascript" src="grayscott.js"></script>
+        <meta charset="UTF-8">
+        <style>
+            #gradient
+            {
+                height: 40px;
+                width: 85%;
+                margin-top: 5px;
+                margin-left:auto;
+                margin-right:auto;
+            }
+        </style>
+        <script>
+            $(function()
+            {
+                $("#gradient").gradient({values:
+                                        [[0, '#000000'],
+                                         [0.4, '#FFFFFF'],
+                                         [0.9, '#FFFFFF'],
+                                         [1.0, '#FFFFFF'],
+                                         [1.0, '#FFFFFF']]});
+                
+                // KLUDGE!
+                colorPicker.offsetX = -512;
+                colorPicker.offsetY = -256;
+                
+                document.getElementById("gradient").onselectstart = function () {return false;};
+                
+                // init();
+            });
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>Gray-Scott model with image-based feed rate (alpha)</h1>
+        </header>
+        <div id="simulation">
+        <canvas id="myCanvas" class="viewer" style="width:512px;height:512px"></canvas>
+        <aside class="panel">
+            <section id="instructions">
+                <header><h4>Instructions</h4></header>
+                <ol>
+                    <li>Paint some strokes on the canvas.</li>
+                    <li>Choose the evolution settings with the controls below.</li>
+                    <li>Watch the evolution.</li>
+                </ol>
+            </section>
+            <section id="controls">
+                <p style="text-align:center">
+                    <button id="btn_clear" onclick="clean()">Clear</button>
+                    <button id="btn_snapshot" onclick="snapshot()">Take snapshot</button>
+                <p/>
+                Death rate:
+                <span class ="remark" id="diminishment"></span><br/>
+                <div id="sld_diminishment" class="slider"></div>
+                Colors:
+                <div id="gradient" style=""></div>
+            </section>
+        </aside>
+        </div>
+        <footer>
+                <div id="copyright">
+                        &copy;2013
+                        <a href="https://twitter.com/pmneila">@pmneila</a>
+                        <a href="https://github.com/pmneila/jsexp">Github</a>
+                        <a id="notworking" href="#">Not working?</a>
+                </div>
+        </footer>
+        
+        <div id="requirement_dialog" title="Requirements">
+            <p>This simulation requires the GL extensions framebuffer_object and texture_float.
+            If you cannot see the simulation your system probably lacks at least one of these extensions.</p>
+            
+            <p>In Google Chrome, you can see the available GL extensions going to chrome://gpu.</p>
+        </div>
+    </body>
+</html>
