@@ -168,12 +168,12 @@ var resize = function(width, height)
     mTexture1 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
                         {minFilter: THREE.LinearFilter,
                          magFilter: THREE.LinearFilter,
-                         format: THREE.RGBFormat,
+                         format: THREE.RGBAFormat,
                          type: THREE.FloatType});
     mTexture2 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
                         {minFilter: THREE.LinearFilter,
                          magFilter: THREE.LinearFilter,
-                         format: THREE.RGBFormat,
+                         format: THREE.RGBAFormat,
                          type: THREE.FloatType});
     mTexture1.wrapS = THREE.RepeatWrapping;
     mTexture1.wrapT = THREE.RepeatWrapping;
