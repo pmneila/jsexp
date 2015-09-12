@@ -177,12 +177,12 @@ var resize = function(width, height)
     mTexture1 = new THREE.WebGLRenderTarget(canvasWidth*scale, canvasHeight*scale,
                         {minFilter: THREE.LinearFilter,
                          magFilter: THREE.LinearFilter,
-                         format: THREE.RGBFormat,
+                         format: THREE.RGBAFormat,
                          type: THREE.FloatType});
     mTexture2 = new THREE.WebGLRenderTarget(canvasWidth*scale, canvasHeight*scale,
                         {minFilter: THREE.LinearFilter,
                          magFilter: THREE.LinearFilter,
-                         format: THREE.RGBFormat,
+                         format: THREE.RGBAFormat,
                          type: THREE.FloatType});
     
     mUniforms.screenWidth.value = canvasWidth*scale;
