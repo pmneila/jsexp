@@ -46,43 +46,45 @@ function init()
 function loadDambreak()
 {
     //1D Dambreak, 10m height first half, 5m second half, 10m long.
-    var npoints = 100;
+    var npoints = 50;
     var L = 10;
+    var cfl = 0.45;
     var surface = new Array(npoints);
-    var xvel = new Array(npoints);
-    var yvel = new Array(npoints);
+    var xmomentum = new Array(npoints);
+    var ymomentum = new Array(npoints);
     ylim = [0, 11];
 
     for (var i = 0; i<npoints; i++){
-        surface[i] = (i<npoints/2) ? 8 : 5;
-        xvel[i] = 0;    
-        yvel[i] = 0;
+        surface[i] = (i<npoints/2) ? 10 : 3;
+        xmomentum[i] = 0;    
     }
-    water = createWater(surface, xvel, yvel, [npoints,L]);
+    water = createWater(surface, xmomentum, [npoints,L,cfl]);
 }
 
 
 //---Create Polygon stuff
 
-function createWater(surface, xvelocity, yvelocity, meshdata)
+function createWater(surface, xmomentum, meshdata)
 {
     var water = [];
 
-    water = new Water(surface, xvelocity, yvelocity, meshdata);
+    water = new Water(surface, xmomentum, meshdata);
 
     return water;
 }
 
 
-function Water(surface, xvelocity, yvelocity, meshdata)
+function Water(surface, xmomentum, meshdata)
 {
     this.surface = surface;
-    this.xvelocity = xvelocity;
-    this.yvelocity = yvelocity;
+    this.h = surface.slice();
+    this.xmomentum = xmomentum;
     this.n = meshdata[0];
     this.L = meshdata[1];
     this.dx = this.L/this.n;
+    this.cfl = meshdata[2];
     this.x = [];
+    this.t = 0;
     for (var i=0; i<this.surface.length; i++){
         this.x.push(i*this.dx);
     }
@@ -126,8 +128,12 @@ function Water(surface, xvelocity, yvelocity, meshdata)
         ctx.closePath();
         ctx.stroke();
         // ctx.fillStyle = "rgba(64, 164, 223, 0.3)";
-        ctx.fillStyle = "rgba(64, 164, 223, 1)";
+        ctx.fillStyle = "rgba(64, 164, 223, 0.5)";
         ctx.fill();
+
+        ctx.font = "14px Arial"
+        ctx.fillStyle = "white";
+        ctx.fillText(water.t,50,50);
         
 
         if (water.n < 40){
@@ -151,8 +157,12 @@ function Water(surface, xvelocity, yvelocity, meshdata)
         //water.disp_surface[this.held_index] = mouseY;
         // gaussianPulse();
         splinePulse();
-        
        }
+       else
+       {
+        simulate(water,bcs_closed);
+       }
+       
        water.drawCurrent();
     }
 
@@ -221,7 +231,6 @@ function splinePulse(){
             
             if (water.x[i] < xmid){
                 var t = (water.x[i] - x0)/(xmid-x0);
-                console.log(x0);
                 water.surface[i] = (2*t*t*t - 3*t*t +1)*surf0;
                 water.surface[i] += (-2*t*t*t + 3*t*t)*surfmid;
             }
@@ -231,6 +240,7 @@ function splinePulse(){
                 water.surface[i] += (-2*t*t*t + 3*t*t)*surff;
              }
             
+            water.h = water.surface.slice();
             water.disp_surface[i] = world2canvas_y(water.surface[i]);
         }
     }    
@@ -256,7 +266,7 @@ function canvas2world_x(xc){
 function run()
 {
     //update al inicio o al final del run??, por ahora da igual
-    water.update();
+    water.update();    
     
     // if(scaleAlpha > 0)
     // {
