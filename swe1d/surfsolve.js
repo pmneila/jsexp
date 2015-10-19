@@ -15,27 +15,30 @@ function roeSolver(hl,hul,hr,hur){
 
 	var l1 = uhat - Math.sqrt(gravity*hhat);
 	var l2 = uhat + Math.sqrt(gravity*hhat);
-	var l1l = ul + Math.sqrt(gravity*hl);
+	var l1l = ul - Math.sqrt(gravity*hl);
 	var l2l = ul + Math.sqrt(gravity*hl);
 	var l1r = ur - Math.sqrt(gravity*hr);
 	var l2r = ur + Math.sqrt(gravity*hr);
 
+	var ws1,ws2
 	if (l1>0){
-		var ws1 = wl1;
-		var ws2 = wl2;
+		ws1 = wl1;
+		ws2 = wl2;
 	}
 	else{
-		var ws1 = wr1;
-		var ws2 = (l2>0) ?  wl2 : wr2;
+		ws1 = wr1;
+		ws2 = (l2>0) ?  wl2 : wr2;
 	}
 	var us = 0.5*(ws1+ws2);
 	var hs = (ws2-ws1)*(ws2-ws1)/(16*gravity);
 
 	if (l1l<0 && l1r > 0){
+		console.log('asdf');
 		us = uhat;
 		hs = hhat;
 	}
 	if (l2l<0 && l2r >0){
+		console.log('fdsa');
 		us = uhat;
 		hs = hhat;
 	}
@@ -74,8 +77,8 @@ function bcs_closed(water){
 	var nx = water.h.length
 	hnew[0] = water.h[1];
 	hunew[0] = -water.xmomentum[1];
-	hnew[hnew.length-1] = water.h[nx-2];
-	hunew[hunew.length-1] = -water.xmomentum[nx-2];
+	hnew[nx-1] = water.h[nx-2];
+	hunew[nx-1] = -water.xmomentum[nx-2];
 	water.h = hnew.slice();
 	water.xmomentum = hunew.slice();
 }
@@ -97,19 +100,21 @@ function setdt(water){
 
 function simulate(water,bcs){
 
+	var tobj = water.t + simStep;
+	while (water.t < tobj){
+		var dt = setdt(water);
+		dt = Math.min(dt,simStep);
+		var dx = water.dx;
+		var cfl = water.cfl;
+		bcs(water);
+		var f = fluxes(water);
 
-	var dt = setdt(water);
-	dt = Math.min(dt,simStep);
-	var dx = water.dx;
-	var cfl = water.cfl;
-	bcs(water);
-	var f = fluxes(water);
-
-	water.t += dt;
-	for (var i = 1; i< water.h.length-1; i++){
-		water.h[i] = water.h[i] -dt/dx*(f[i][0]-f[i-1][0]);
-		water.xmomentum[i] = water.xmomentum[i] -dt/dx*(f[i][1] - f[i-1][1]);
+		water.t += dt;
+		for (var i = 1; i< water.h.length-1; i++){
+			water.h[i] = water.h[i] -dt/dx*(f[i][0]-f[i-1][0]);
+			water.xmomentum[i] = water.xmomentum[i] -dt/dx*(f[i][1] - f[i-1][1]);
+		}
+		water.surface = water.h.slice();
+		water.disp_surface = water.surface.map(world2canvas_y);
 	}
-	water.surface = water.h.slice();
-	water.disp_surface = water.surface.map(world2canvas_y);
 }

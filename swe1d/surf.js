@@ -23,7 +23,7 @@ var clickRadius = 30;
 function init()
 {
     // init_controls();
-    
+
     //dom objects
     canvas = document.getElementById("myCanvas");
     simulation = document.getElementById("simulation");
@@ -37,26 +37,25 @@ function init()
 
     //set the canvas.
     ctx = canvas.getContext("2d");
-    
+
     loadDambreak();
-    
+
     setInterval(run, simStep*1000);
 }
 
 function loadDambreak()
 {
     //1D Dambreak, 10m height first half, 5m second half, 10m long.
-    var npoints = 50;
+    var npoints = 100;
     var L = 10;
     var cfl = 0.45;
     var surface = new Array(npoints);
     var xmomentum = new Array(npoints);
-    var ymomentum = new Array(npoints);
     ylim = [0, 11];
 
     for (var i = 0; i<npoints; i++){
         surface[i] = (i<npoints/2) ? 10 : 3;
-        xmomentum[i] = 0;    
+        xmomentum[i] = 0;
     }
     water = createWater(surface, xmomentum, [npoints,L,cfl]);
 }
@@ -96,8 +95,8 @@ function Water(surface, xmomentum, meshdata)
 
     //display parameters
     this.radius = 3;//Math.log(mass);
-    this.style = "rgba(200, 255, 255, 1)";    
-    
+    this.style = "rgba(200, 255, 255, 1)";
+
     //save canvas coordinates to plot
     //add left and right margins and scale to plot
     this.disp_x = this.x.map(
@@ -107,20 +106,20 @@ function Water(surface, xmomentum, meshdata)
     //add top margin and scale to plot
     this.disp_surface = this.surface.map(
         function(surfi,index,surf) {return world2canvas_y(surfi)} );
-    
+
     this.drawCurrent = function()
     {
         // Update the view.
         //probar ctx.clearRect(0,0,canvasWidth, canvasHeight)
         ctx.fillStyle = "rgba(0, 0, 0, 0.65)";//"#000000";
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-        
+
         ctx.strokeStyle = "#666666";
-        
+
         ctx.beginPath();
         var floor_y = world2canvas_y(0)
 
-        ctx.moveTo(water.disp_x[0], floor_y)    
+        ctx.moveTo(water.disp_x[0], floor_y)
         for(var i = 0; i < water.x.length; i++){
             ctx.lineTo(water.disp_x[i], water.disp_surface[i]);
         }
@@ -134,21 +133,21 @@ function Water(surface, xmomentum, meshdata)
         ctx.font = "14px Arial"
         ctx.fillStyle = "white";
         ctx.fillText(water.t,50,50);
-        
+
 
         if (water.n < 40){
             for(var i = 0; i< water.x.length; i++){
                 ctx.fillStyle = water.style;
                 ctx.beginPath();
-                ctx.arc(water.disp_x[i],  water.disp_surface[i], 
+                ctx.arc(water.disp_x[i],  water.disp_surface[i],
                     water.radius, 0, 2*Math.PI, false);
                 ctx.closePath();
-                ctx.fill();   
-            }            
-        }   
+                ctx.fill();
+            }
+        }
 
     }
-   
+
     this.update = function(step)
     {
        if (this.hold)
@@ -162,7 +161,7 @@ function Water(surface, xmomentum, meshdata)
        {
         simulate(water,bcs_closed);
        }
-       
+
        water.drawCurrent();
     }
 
@@ -173,7 +172,7 @@ function Water(surface, xmomentum, meshdata)
 
 }
 function gaussianPulse()
-{   
+{
     //transform to canvas units
     var sigma2 = Math.pow(water.sigma,2);
     var center = water.x[water.held_index];
@@ -190,10 +189,10 @@ function gaussianPulse()
         else if (water.x[i] >= x0 && water.x[i] <= xf){
             var disp = amplitude*Math.exp(-Math.pow(water.x[i]-center,2)/sigma2);
             if (water.disp_surface[i]<mouseY){
-                disp = -1*disp; 
+                disp = -1*disp;
             }
-                 
-            water.surface[i] += disp;   
+
+            water.surface[i] += disp;
             water.disp_surface[i] += -disp*canvasHeight/(ylim[1]-ylim[0]);
         }
     }
@@ -228,7 +227,7 @@ function splinePulse(){
             return
         }
         else if (water.x[i] >= x0 && water.x[i] <= xf){
-            
+
             if (water.x[i] < xmid){
                 var t = (water.x[i] - x0)/(xmid-x0);
                 water.surface[i] = (2*t*t*t - 3*t*t +1)*surf0;
@@ -239,18 +238,18 @@ function splinePulse(){
                 water.surface[i] = (2*t*t*t - 3*t*t +1)*surfmid;
                 water.surface[i] += (-2*t*t*t + 3*t*t)*surff;
              }
-            
+
             water.h = water.surface.slice();
             water.disp_surface[i] = world2canvas_y(water.surface[i]);
         }
-    }    
+    }
 }
 
 
 function world2canvas_y(y)
 {
     return canvasHeight*(1 - (y-ylim[0])/(ylim[1]-ylim[0]) );
-}   
+}
 function canvas2world_y(yc)
 {
     return (1-yc/canvasHeight)*(ylim[1] - ylim[0]) + ylim[0];
@@ -266,8 +265,8 @@ function canvas2world_x(xc){
 function run()
 {
     //update al inicio o al final del run??, por ahora da igual
-    water.update();    
-    
+    water.update();
+
     // if(scaleAlpha > 0)
     // {
     //     drawScale(scaleAlpha);
@@ -295,7 +294,7 @@ function onMouseDown(e)
     var held_index = getNearestFVCell([mouseX, mouseY]);
     if(held_index==-1)
         return;
-    
+
     if(ev.button == 0)
         holdFVCell(held_index);
     // if(ev.button == 1)
@@ -322,7 +321,7 @@ function getNearestFVCell(pos)
         //pick the closest cell in the y axis
         // var dist = norm(diff([canvas_fv_x,0], [pos[0],0]));
         var dist = Math.abs(canvas_fv_x - pos[0]);
-        
+
         //always return a valid point
         // if(dist < clickRadius){
             // return i;
