@@ -3,13 +3,13 @@ var canvasHeight = 500;
 
 //World constants.
 var gravity = 9.81;
-
+var hmin = 0;
 // Physical world.
 var water = [];
 
 
 // Time
-var simStep = 1/30; //30FPS
+var simStep = 1/60; //30FPS
 
 //Display world
 var xoffset = canvasWidth*0.00;
@@ -46,8 +46,8 @@ function init()
 function loadDambreak()
 {
     //1D Dambreak, 10m height first half, 5m second half, 10m long.
-    var npoints = 100;
-    var L = 10;
+    var npoints = 40;
+    var L = 30;
     var cfl = 0.45;
     var surface = new Array(npoints);
     var xmomentum = new Array(npoints);
@@ -84,6 +84,7 @@ function Water(surface, xmomentum, meshdata)
     this.cfl = meshdata[2];
     this.x = [];
     this.t = 0;
+    this.nstep = -1;
     for (var i=0; i<this.surface.length; i++){
         this.x.push(i*this.dx);
     }
@@ -127,7 +128,7 @@ function Water(surface, xmomentum, meshdata)
         ctx.closePath();
         ctx.stroke();
         // ctx.fillStyle = "rgba(64, 164, 223, 0.3)";
-        ctx.fillStyle = "rgba(64, 164, 223, 0.5)";
+        ctx.fillStyle = "rgba(64, 164, 223, 1.0)";
         ctx.fill();
 
         ctx.font = "14px Arial"
@@ -150,53 +151,22 @@ function Water(surface, xmomentum, meshdata)
 
     this.update = function(step)
     {
-       if (this.hold)
-       {
-        //water.surface[this.held_index] = canvas2world_y(mouseY);
-        //water.disp_surface[this.held_index] = mouseY;
-        // gaussianPulse();
-        splinePulse();
-       }
-       else
-       {
-        simulate(water,bcs_closed);
-       }
+        if (this.hold)
+        {
+            //water.surface[this.held_index] = canvas2world_y(mouseY);
+            //water.disp_surface[this.held_index] = mouseY;
 
-       water.drawCurrent();
+            splinePulse();
+        }
+        // else
+        simulate(water,bcs_closed);
+        water.drawCurrent();
     }
 
     this.setHold = function(val)
     {
         this.hold = val;
     }
-
-}
-function gaussianPulse()
-{
-    //transform to canvas units
-    var sigma2 = Math.pow(water.sigma,2);
-    var center = water.x[water.held_index];
-    var amplitude = Math.abs(canvas2world_y(mouseY)-water.surface[water.held_index]);
-
-    //apply pulse on [center-2sigma,center+2sigma] intersection [0,L]
-    var x0 = Math.max(xoffset,canvas2world_x(mouseX)-2*water.sigma);
-    var xf = Math.min(canvasWidth-xoffset, canvas2world_x(mouseX)+2*water.sigma);
-
-    for (i=0; i<water.n; i++){
-        if (water.x[i]> xf){
-            return
-        }
-        else if (water.x[i] >= x0 && water.x[i] <= xf){
-            var disp = amplitude*Math.exp(-Math.pow(water.x[i]-center,2)/sigma2);
-            if (water.disp_surface[i]<mouseY){
-                disp = -1*disp;
-            }
-
-            water.surface[i] += disp;
-            water.disp_surface[i] += -disp*canvasHeight/(ylim[1]-ylim[0]);
-        }
-    }
-
 
 }
 
@@ -267,6 +237,7 @@ function run()
     //update al inicio o al final del run??, por ahora da igual
     water.update();
 
+    // drawScale(0.8);
     // if(scaleAlpha > 0)
     // {
     //     drawScale(scaleAlpha);
@@ -370,4 +341,32 @@ function diff(p1, p2)
     for(i = 0; i < p1.length; ++i)
         res[i] = p1[i] - p2[i];
     return res;
+}
+
+function drawScale(scaleAlpha)
+{
+    ctx.strokeStyle = "rgba(255, 255, 255, " + scaleAlpha + ")";
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.beginPath();
+    // Top line.
+    ctx.moveTo(5, 20);
+    ctx.lineTo(canvasWidth/2-40, 20);
+    ctx.moveTo(canvasWidth/2+40, 20);
+    ctx.lineTo(canvasWidth-5, 20);
+    // Right line.  
+    ctx.moveTo(canvasWidth-20, 5);
+    ctx.lineTo(canvasWidth-20, canvasHeight/2-40);
+    ctx.moveTo(canvasWidth-20, canvasHeight/2+40);
+    ctx.lineTo(canvasWidth-20, canvasHeight-5);
+    ctx.stroke();
+    // Top text.
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText((canvasWidth/pixelsPerMeter).toFixed(2) + "m", canvasWidth/2, 20);
+    // Right text.
+    ctx.save();
+    ctx.translate(canvasWidth-20, canvasHeight/2);
+    ctx.rotate(Math.PI/2);
+    ctx.fillText((canvasHeight/pixelsPerMeter).toFixed(2) + "m", 0, 0);
+    ctx.restore();
 }
