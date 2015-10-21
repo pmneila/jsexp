@@ -46,7 +46,7 @@ function init()
 function loadDambreak()
 {
     //1D Dambreak, 10m height first half, 5m second half, 10m long.
-    var npoints = 40;
+    var npoints = 100;
     var L = 30;
     var cfl = 0.45;
     var surface = new Array(npoints);
@@ -92,7 +92,7 @@ function Water(surface, xmomentum, meshdata)
     //mouse holding parameters
     this.hold = false;    //is any point held?
     this.held_index = -1; //which point is held, if any
-    this.sigma = 1; //variance of the gaussian pulse in world units
+    this.sigma = this.L/10; //variance of the gaussian pulse in world units
 
     //display parameters
     this.radius = 3;//Math.log(mass);
