@@ -1,0 +1,13 @@
+.row-content {
+    margin:0px auto;
+    padding: 50px 0px 50px 0px;
+    border-bottom: 1px ridge;
+    min-height:600px;
+}
+
+#simulation {
+    border-radius: 5px;
+    background-color: white;
+    border: 1px solid #DDD;
+/*     overflow: hidden; */	
+}

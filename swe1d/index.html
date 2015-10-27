@@ -1,45 +1,88 @@
 <!DOCTYPE html>
-    <head>
-        <title>1D Non linear shallow water</title>
-        <link rel="stylesheet" type="text/css" href="../css/experiments.css"/>
-        <link type="text/css" href="../3rd/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
-        <script type="text/javascript" src="../3rd/jquery-1.6.2.min.js"></script>
-        <script type="text/javascript" src="../3rd/jquery-ui-1.8.16.custom.min.js"></script>
+<head>
+  <title>1D Non linear shallow water</title>
 
-        <script type="text/javascript" src="surf.js"></script>
-        <script type="text/javascript" src="surfsolve.js"></script>
-        <meta charset="UTF-8">
-        <script>
-            $(function() {
-                init();
-            });
-        </script>
+  <!--   	Bootstrap stuff -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head
+  content must come *after* these tags -->
+  <title> SWE1D </title>
 
-     <body>
-        <header>
-            <h1>1D Shallow water</h1>
-        </header>
-        <div id="simulation">
-            <canvas id="myCanvas" width="900" height="300"></canvas>
-            <aside class="panel">
-                <section id="instructions">
-                    <header><h4>Instructions</h4></header>
-                    <ol>
-                        <li> Click anywhere inside the canvas.
-                        <li> You can also drag the water.
-                    </ol>
-                </section>
-                <section id="controls">
-                	<ol>
-                		<li> No additional controls yet.
-                	</ol>    
-                </section>
-            </aside>
+  <!-- Bootstrap -->
+  <link href="../css/bootstrap.min.css" rel="stylesheet">
+  <link href="../css/bootstrap-theme.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" type="text/css" href="experiments.css"/>
+  <link type="text/css" href="../3rd/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+  <script type="text/javascript" src="../3rd/jquery-1.6.2.min.js"></script>
+  <script type="text/javascript" src="../3rd/jquery-ui-1.8.16.custom.min.js"></script>
+
+
+  <script type="text/javascript" src="surf.js"></script>
+  <script type="text/javascript" src="surfsolve.js"></script>
+  <meta charset="UTF-8">
+  <script>
+  $(function() {
+    init();
+  });
+  </script>
+</head>
+
+<body>
+  <header class="jumbotron">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-sm-8">
+          <h1>WaterJS experiments </h1>
         </div>
-        <footer>
-            <div id="copyright">
-                <footer>&copy;2015, jgalazm	</footer>
-            </div>
-        </footer>
-    </body>
-    </head>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row row-content">
+      <div id="simulation" class="col-xs-12 col-sm-10">
+        <canvas id="myCanvas" width="100" height="200"></canvas>
+      </div>
+
+      <div class="col-xs-12 col-sm-2">
+        <!-- <div class="row"> -->
+          <!-- <div class="col-xs-12 col-sm-8"> -->
+            <h1>Flume</h1>
+            Move the water with a mouse click.
+          <!-- </div> -->
+        <!-- </div> -->
+      </div>
+    </div>
+    <!--     <div class="row row-content"> -->
+    <!--       <div class="col-xs-12 col-md-6"> -->
+    <!--       <h1> Titulo del Lorem ipsum 1 </h1> -->
+    <!-- 	Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido usó una galería de textos y los mezcló de tal manera que logró hacer un libro de textos especimen. No sólo sobrevivió 500 años, sino que tambien ingresó como texto de relleno en documentos electrónicos, quedando esencialmente igual al original. Fue popularizado en los 60s con la creación de las hojas "Letraset", las cuales contenian pasajes de Lorem Ipsum, y más recientemente con software de autoedición, como por ejemplo Aldus PageMaker, el cual incluye versiones de Lorem Ipsum. -->
+    <!-- 	    <ol> -->
+    <!-- 		<li> Click anywhere inside the canvas. -->
+    <!-- 		<li> You can also drag the water. -->
+    <!-- 	    </ol> -->
+    <!--       </div>     -->
+    <!--       <div class="col-xs-12 col-md-6"> -->
+    <!--       <h1> Titulo del Lorem ipsum 2 </h1> -->
+    <!--       Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido usó una galería de textos y los mezcló de tal manera que logró hacer un libro de textos especimen. No sólo sobrevivió 500 años, sino que tambien ingresó como texto de relleno en documentos electrónicos, quedando esencialmente igual al original. Fue popularizado en los 60s con la creación de las hojas "Letraset", las cuales contenian pasajes de Lorem Ipsum, y más recientemente con software de autoedición, como por ejemplo Aldus PageMaker, el cual incluye versiones de Lorem Ipsum. -->
+    <!--       </div> -->
+    <!--     </div>  -->
+  </div>
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-sm-offset-5" id="copyright">
+          <footer>&copy;2015, jgalazm	</footer>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="../js/bootstrap.min.js"></script>
+</body>

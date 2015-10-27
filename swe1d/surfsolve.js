@@ -59,9 +59,6 @@ function fluxes(water){
 	var nx = water.h.length;
 	var f = new Array(nx-1); //nx-1 times 2
 	for (var i=0; i<nx-1; i++){
-		if (i==nx-3){
-			console.log(i);
-		}
 		var hs_us = roeSolver(
 			water.h[i],water.xmomentum[i],
 			water.h[i+1],water.xmomentum[i+1]);
@@ -110,26 +107,9 @@ function simulate(water,bcs){
 
 		water.t += dt;
 		water.nstep++;
-		// console.log(water.t,dt);
-		if (water.h.slice(water.n-5)[0]>0){
-		console.log(water.h.slice(water.n-5));
-		console.log(water.xmomentum.slice(water.n-5));		
-		console.log('-------------');	
-		}
 		for (var i = 1; i< water.h.length-1; i++){
-			if(isNaN(water.h[i])){
-				console.log(h[i],h[i-1],i,water.n)
-			}
-			if(i==water.h.length-2){
-				console.log(i);
-			}
-
 			water.h[i] = water.h[i] -dt/dx*(f[i][0]-f[i-1][0]);
 			water.xmomentum[i] = water.xmomentum[i] -dt/dx*(f[i][1] - f[i-1][1]);
-			if(water.h[i]<0){
-				console.log(i,h[i],h[i-1]);
-				console.log('asdf')
-			}
 		}
 		water.surface = water.h.slice();
 		water.disp_surface = water.surface.map(world2canvas_y);
