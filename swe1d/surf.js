@@ -33,6 +33,9 @@ function init() {
     canvasWidth = canvas.width;
     canvasHeight = canvas.height;
     window.addEventListener('resize', resizeCanvas, false);
+    canvas.addEventListener("touchsmove", onMouseMove, false);
+    canvas.addEventListener("touchstart", onMouseDown, false);
+    canvas.addEventListener("touchend", onMouseMove, false);
 
 
     //set the canvas context
@@ -125,14 +128,14 @@ function Water(surface, xmomentum, meshdata) {
             ctx.lineTo(water.disp_x[i], water.disp_surface[i]);
         }
         ctx.lineTo(water.disp_x[water.x.length - 1], floor_y);
-        
+
 	//complete the drawing
-	ctx.closePath();        
+	ctx.closePath();
         ctx.fillStyle = "rgba(64, 164, 223, 1.0)";
         ctx.fill();
 	ctx.strokeStyle = "#999999";
 	ctx.stroke();
-	
+
 	//write the timestamp
         ctx.font = "14px Arial"
         ctx.fillStyle = "#BBB";
@@ -221,6 +224,7 @@ function run() {
 function onMouseMove(e) {
     var ev = e ? e : window.event;
     //pagex - offsetleft da la coordenada del canvas
+    //mouseX onmousemove to drag things
     mouseX = ev.pageX - simulation.offsetLeft;
     mouseY = ev.pageY - simulation.offsetTop;
     if (water.hold)
@@ -229,7 +233,6 @@ function onMouseMove(e) {
 
 function onMouseDown(e) {
     var ev = e ? e : window.event;
-    mouseDown = true;
 
     var held_index = getNearestFVCell([mouseX, mouseY]);
     if (held_index == -1)
@@ -242,10 +245,10 @@ function onMouseDown(e) {
 }
 
 function onMouseUp(e) {
-    mouseDown = false;
     releaseFVCell();
 }
 
+// Touch events analogous to mouse events
 //needed by mouse
 function getNearestFVCell(pos) {
     var i = 0;
