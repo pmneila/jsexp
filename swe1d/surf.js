@@ -33,9 +33,9 @@ function init() {
     canvasWidth = canvas.width;
     canvasHeight = canvas.height;
     window.addEventListener('resize', resizeCanvas, false);
-    canvas.addEventListener("touchsmove", onMouseMove, false);
-    canvas.addEventListener("touchstart", onMouseDown, false);
-    canvas.addEventListener("touchend", onMouseMove, false);
+    canvas.addEventListener("touchstart", onTouchStart, false);
+    canvas.addEventListener("touchmove", onTouchMove, false);
+    canvas.addEventListener("touchend", onTouchEnd, false);
 
 
     //set the canvas context
@@ -221,33 +221,47 @@ function run() {
 
 //mouse interaction
 
+
+function onMouseDown(e) {
+  //get first coordinate and hold the cell
+    var ev = e ? e : window.event;
+    mouseX = ev.pageX - simulation.offsetLeft;
+    mouseY = ev.pageY - simulation.offsetTop;
+    var held_index = getNearestFVCell([mouseX, mouseY]);
+    holdFVCell(held_index);
+}
 function onMouseMove(e) {
     var ev = e ? e : window.event;
-    //pagex - offsetleft da la coordenada del canvas
-    //mouseX onmousemove to drag things
+    //update held cell
     mouseX = ev.pageX - simulation.offsetLeft;
     mouseY = ev.pageY - simulation.offsetTop;
     if (water.hold)
         water.held_index = getNearestFVCell([mouseX, 0]);
 }
-
-function onMouseDown(e) {
-    var ev = e ? e : window.event;
-
-    var held_index = getNearestFVCell([mouseX, mouseY]);
-    if (held_index == -1)
-        return;
-
-    if (ev.button == 0)
-        holdFVCell(held_index);
-    // if(ev.button == 1)
-    // p.setPin(!p.pin);
-}
-
 function onMouseUp(e) {
     releaseFVCell();
 }
 
+function onTouchStart(e) {
+    var ev = e ? e : window.event;
+    e.preventDefault();
+    mouseX = ev.targetTouches[0].pageX - simulation.offsetLeft;
+    mouseY = ev.targetTouches[0].pageY - simulation.offsetTop;
+    var held_index = getNearestFVCell([mouseX, mouseY]);
+    holdFVCell(held_index);
+}
+
+function onTouchMove(e){
+  var ev = e ? e: window.event;
+  e.preventDefault();
+  mouseX = ev.targetTouches[0].pageX - simulation.offsetLeft;
+  mouseY = ev.targetTouches[0].pageY - simulation.offsetTop;
+  if (water.hold)
+      water.held_index = getNearestFVCell([mouseX, 0]);
+}
+function onTouchEnd(e){
+  releaseFVCell();
+}
 // Touch events analogous to mouse events
 //needed by mouse
 function getNearestFVCell(pos) {
@@ -257,21 +271,13 @@ function getNearestFVCell(pos) {
     for (i = 0; i < water.x.length; i++) {
         var canvas_fv_x = water.disp_x[i];
         var canvas_fv_y = water.disp_surface[i];
-        // var dist = norm(diff([canvas_fv_x,canvas_fv_y], pos));
-        //pick the closest cell in the y axis
-        // var dist = norm(diff([canvas_fv_x,0], [pos[0],0]));
         var dist = Math.abs(canvas_fv_x - pos[0]);
 
-        //always return a valid point
-        // if(dist < clickRadius){
-        // return i;
-        // }
         if (dist < mindist) {
             mindist = dist;
             minloc = i;
         }
     }
-    // return -1;
     return minloc;
 }
 
@@ -287,21 +293,4 @@ function releaseFVCell() {
         water.held_index = -1;
         water.setHold(false);
     }
-}
-
-//vector math
-function norm(vector) {
-    var sum = 0;
-    var i;
-    for (i in vector)
-        sum += vector[i] * vector[i];
-    return Math.sqrt(sum);
-}
-
-function diff(p1, p2) {
-    var res = [];
-    var i = 0;
-    for (i = 0; i < p1.length; ++i)
-        res[i] = p1[i] - p2[i];
-    return res;
 }
