@@ -9,5 +9,9 @@
     border-radius: 5px;
     background-color: white;
     border: 1px solid #DDD;
-/*     overflow: hidden; */	
+/*     overflow: hidden; */
+}
+.jumbotron{
+  background: #525B77;
+  color: #ffffff;
 }
