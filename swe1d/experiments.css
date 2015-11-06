@@ -1,18 +1,3 @@
-.row-content {
-    margin:0px auto;
-    padding: 50px 0px 50px 0px;
-    border-bottom: 1px ridge;
-    /*min-height:600px;*/
-}
-.row-header{
-    margin:0px auto;
-    padding:0px auto;
-}
-
-.jumbotron{
-  background: #525B77;
-  color: #ffffff;
-}
 #simulation {
     border-radius: 5px;
     background-color: white;
