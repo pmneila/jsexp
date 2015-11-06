@@ -1,8 +1,7 @@
 # waterexp
 
-A repository for hosting (hopefully several) interactive JS water experiments.
+A repository for hosting (hopefully several) interactive JS water experiments. You need a [Chrome](http://www.google.cl/chrome/browser/desktop/index.html) like browser to make it work :).
 
-Currently it contains
 
 ## [SWE1D](https://jgalazm.github.io/swe1d.html)
 [![SWE1D preview](swe1d/snapshots/snap1.png)](https://jgalazm.github.io/swe1d.html)
