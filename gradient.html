@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Chrome (modified)</title>
+  </head>
+  <body>
+    <canvas id="myPrettyCanvas" width="300" height="300"></canvas>
+    <script type="text/javascript">
+      var canvasId = 'myPrettyCanvas',
+          canvas = document.getElementById(canvasId),
+          ctx = canvas.getContext('2d'),
+          grd;
+      
+      // Create gradient
+      grd = ctx.createLinearGradient(0.000, 200.000, 0.000, 0.000);
+      
+      // Add colors
+      grd.addColorStop(0.006, 'rgba(4, 29, 59, 1.000)');
+      grd.addColorStop(0.120, 'rgba(8, 59, 118, 1.000)');
+      grd.addColorStop(0.130, 'rgba(24, 77, 157, 1.000)');
+      grd.addColorStop(0.250, 'rgba(59, 106, 204, 1.000)');
+      grd.addColorStop(0.260, 'rgba(39, 32, 228, 1.000)');
+      grd.addColorStop(0.380, 'rgba(113, 184, 249, 1.000)');
+      grd.addColorStop(0.390, 'rgba(0, 106, 17, 1.000)');
+      grd.addColorStop(0.500, 'rgba(0, 208, 0, 1.000)');
+      grd.addColorStop(0.510, 'rgba(137, 130, 0, 1.000)');
+      grd.addColorStop(0.620, 'rgba(254, 229, 20, 1.000)');
+      grd.addColorStop(0.630, 'rgba(131, 80, 0, 1.000)');
+      grd.addColorStop(0.750, 'rgba(225, 128, 16, 1.000)');
+      grd.addColorStop(0.760, 'rgba(159, 19, 0, 1.000)');
+      grd.addColorStop(0.870, 'rgba(249, 26, 0, 1.000)');
+      grd.addColorStop(0.880, 'rgba(255, 255, 255, 1.000)');
+      grd.addColorStop(1.000, 'rgba(255, 64, 196, 1.000)');
+      
+      // Fill with gradient
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, 25.000, 200.000);
+    </script>
+  </body>
+</html>
