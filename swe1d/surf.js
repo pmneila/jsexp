@@ -62,7 +62,6 @@ function drawScale() {
 		var height = world2canvas_x(0.25);
 		var colors = ['black', 'white', 'black', 'white'];
 		
-		console.log(colors[2])
 		for (var i=0; i<3; i++){
 			var xleft = world2canvas_x(1) + width*i;
 			ctx.fillStyle = colors[i];
