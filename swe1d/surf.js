@@ -43,7 +43,6 @@ function init() {
 
     loadDambreak();
     resizeCanvas();
-
     setInterval(run, simStep * 1000);
 }
 
@@ -53,6 +52,29 @@ function resizeCanvas() {
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     water.disp_x = water.x.map(world2canvas_x);
+
+}
+
+function drawScale() {
+
+		var yupper = world2canvas_y(ylim[1]/20.);//
+		var width = world2canvas_x(1);
+		var height = world2canvas_x(0.25);
+		var colors = ['black', 'white', 'black', 'white'];
+		
+		console.log(colors[2])
+		for (var i=0; i<3; i++){
+			var xleft = world2canvas_x(1) + width*i;
+			ctx.fillStyle = colors[i];
+			ctx.fillRect(xleft,yupper,width,height)																  
+			ctx.stroke();
+		}
+		
+    ctx.font = "14px Arial"
+    ctx.fillStyle = "#555";
+    ctx.fillText(0, world2canvas_x(1) , yupper-height/2.);	
+		ctx.fillText('3m', xleft+width , yupper-height/2.);	
+
 }
 
 function loadDambreak() {
@@ -118,9 +140,9 @@ function Water(surface, xmomentum, meshdata) {
 
     this.drawCurrent = function() {
         // Update the view.
-        ctx.clearRect(0,0,canvasWidth, canvasHeight)
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
-	//Trace surface path
+        //Trace surface path
         ctx.beginPath();
         var floor_y = world2canvas_y(0)
         ctx.moveTo(water.disp_x[0], floor_y)
@@ -129,17 +151,19 @@ function Water(surface, xmomentum, meshdata) {
         }
         ctx.lineTo(water.disp_x[water.x.length - 1], floor_y);
 
-	//complete the drawing
-	ctx.closePath();
+        //complete the drawing
+        ctx.closePath();
         ctx.fillStyle = "rgba(64, 164, 223, 1.0)";
         ctx.fill();
-	ctx.strokeStyle = "#999999";
-	ctx.stroke();
+        ctx.strokeStyle = "#999999";
+        ctx.stroke();
 
-	//write the timestamp
+        //write the timestamp
         ctx.font = "14px Arial"
         ctx.fillStyle = "#BBB";
         ctx.fillText(water.t.toFixed(2), 50, 50);
+			
+			  drawScale();
     }
     this.update = function(step) {
         if (this.hold) {
@@ -223,13 +247,14 @@ function run() {
 
 
 function onMouseDown(e) {
-  //get first coordinate and hold the cell
+    //get first coordinate and hold the cell
     var ev = e ? e : window.event;
     mouseX = ev.pageX - simulation.offsetLeft;
     mouseY = ev.pageY - simulation.offsetTop;
     var held_index = getNearestFVCell([mouseX, mouseY]);
     holdFVCell(held_index);
 }
+
 function onMouseMove(e) {
     var ev = e ? e : window.event;
     //update held cell
@@ -238,6 +263,7 @@ function onMouseMove(e) {
     if (water.hold)
         water.held_index = getNearestFVCell([mouseX, 0]);
 }
+
 function onMouseUp(e) {
     releaseFVCell();
 }
@@ -251,17 +277,19 @@ function onTouchStart(e) {
     holdFVCell(held_index);
 }
 
-function onTouchMove(e){
-  var ev = e ? e: window.event;
-  e.preventDefault();
-  mouseX = ev.targetTouches[0].pageX - simulation.offsetLeft;
-  mouseY = ev.targetTouches[0].pageY - simulation.offsetTop;
-  if (water.hold)
-      water.held_index = getNearestFVCell([mouseX, 0]);
+function onTouchMove(e) {
+    var ev = e ? e : window.event;
+    e.preventDefault();
+    mouseX = ev.targetTouches[0].pageX - simulation.offsetLeft;
+    mouseY = ev.targetTouches[0].pageY - simulation.offsetTop;
+    if (water.hold)
+        water.held_index = getNearestFVCell([mouseX, 0]);
 }
-function onTouchEnd(e){
-  releaseFVCell();
+
+function onTouchEnd(e) {
+    releaseFVCell();
 }
+
 // Touch events analogous to mouse events
 //needed by mouse
 function getNearestFVCell(pos) {
