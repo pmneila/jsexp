@@ -117,7 +117,6 @@ function loadControls(){
 			var folderTime = gui.addFolder('Time');
 			folderTime.add(text, 'restart').name('Restart');
 			folderTime.add(text, 'pause').name('Pause/Continue');
-			folderTime.open();
 					
 	
 			var folderTouchMouse = gui.addFolder('Touch/Mouse');
@@ -133,6 +132,9 @@ function loadControls(){
 			clickStyleControl.onChange(function(value){
 				water.clickStyle = value;
 			});
+	
+			var customContainer = document.getElementById('controls');
+			customContainer.appendChild(gui.domElement);
 }
 
 function createWater(surface, xmomentum, meshdata) {
