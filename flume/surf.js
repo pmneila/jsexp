@@ -21,8 +21,6 @@ var mouseX, mouseY, mouseDown;
 var clickRadius = 30;
 
 function init() {
-    // init_controls();
-
     //dom objects
     canvas = document.getElementById("myCanvas");
     simulation = document.getElementById("simulation");
@@ -37,14 +35,14 @@ function init() {
     canvas.addEventListener("touchstart", onTouchStart, false);
     canvas.addEventListener("touchmove", onTouchMove, false);
     canvas.addEventListener("touchend", onTouchEnd, false);
-			
-	
+
+
 		//window.onload = loadControls();
 
     //set the canvas context
     ctx = canvas.getContext("2d");
-		
-		
+
+
     loadDambreak();
     resizeCanvas();
 		loadControls();
@@ -82,57 +80,57 @@ function drawScale() {
 		var width = world2canvas_x(1);
 		var height = world2canvas_x(0.25);
 		var colors = ['black', 'white', 'black', 'white'];
-		
+
 		for (var i=0; i<3; i++){
 			var xleft = world2canvas_x(1) + width*i;
 			ctx.fillStyle = colors[i];
-			ctx.fillRect(xleft,yupper,width,height)																  
+			ctx.fillRect(xleft,yupper,width,height)
 			ctx.stroke();
 		}
-		
+
     ctx.font = "14px Arial"
     ctx.fillStyle = "#555";
-    ctx.fillText(0, world2canvas_x(1) , yupper-height/2.);	
-		ctx.fillText('3m', xleft+width , yupper-height/2.);	
+    ctx.fillText(0, world2canvas_x(1) , yupper-height/2.);
+		ctx.fillText('3m', xleft+width , yupper-height/2.);
 
 }
 
 function flumeControls(){
 			this.clickWidth = water.sigma*2.;
 			this.clickStyle = 'spline';
-			this.restart = function(){ 
+			this.restart = function(){
 				loadDambreak();
 				if (paused)
 					water.drawCurrent();
-			
+
 			};
-			this.pause = function(){ paused = !paused};			
+			this.pause = function(){ paused = !paused};
 }
 
 function loadControls(){
 			var text = new flumeControls();
-			var gui = new dat.GUI();
-	
-			
+			var gui = new dat.GUI({autoPlace:false});
+
+
 			var folderTime = gui.addFolder('Time');
 			folderTime.add(text, 'restart').name('Restart');
 			folderTime.add(text, 'pause').name('Pause/Continue');
-					
-	
+
+
 			var folderTouchMouse = gui.addFolder('Touch/Mouse');
 			clickWidthControl = folderTouchMouse.add(
 				text, 'clickWidth', 0.1,10).name('Width');
 			clickStyleControl = folderTouchMouse.add(
 				text, 'clickStyle',['spline','rect','tri']).name('Style');
-	
+
 			clickWidthControl.onChange(function(value){
 				water.sigma = value/2.
 			});
-			
+
 			clickStyleControl.onChange(function(value){
 				water.clickStyle = value;
 			});
-	
+
 			var customContainer = document.getElementById('controls');
 			customContainer.appendChild(gui.domElement);
 }
@@ -206,7 +204,7 @@ function Water(surface, xmomentum, meshdata) {
         ctx.font = "14px Arial"
         ctx.fillStyle = "#BBB";
         ctx.fillText(water.t.toFixed(2), 50, 50);
-			
+
 			  drawScale();
     }
     this.update = function(step) {
@@ -262,13 +260,13 @@ function pulse() {
 									var t = (water.x[i] - xmid) / (xf - xmid);
 									water.surface[i] = (2 * t * t * t - 3 * t * t + 1) * surfmid;
 									water.surface[i] += (-2 * t * t * t + 3 * t * t) * surff;
-							}							
+							}
 							water.disp_surface[i] = world2canvas_y(water.surface[i]);
 					}
 					else if (water.clickStyle=='rect'){
 							water.surface[i] = surfmid;
 							water.disp_surface[i] = world2canvas_y(water.surface[i]);
-					}					
+					}
 					else if (water.clickStyle=='tri'){
 							if (water.x[i] < xmid) {
 									var t = (water.x[i] - x0) / (xmid - x0);
@@ -276,8 +274,8 @@ function pulse() {
 							} else {
 									var t = (water.x[i] - xmid) / (xf - xmid);
 									water.surface[i] = (1-t)*surfmid + t*surff;
-							}							
-							water.disp_surface[i] = world2canvas_y(water.surface[i]);						
+							}
+							water.disp_surface[i] = world2canvas_y(water.surface[i]);
 					}
         }
     }
