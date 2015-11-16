@@ -119,7 +119,7 @@ function initControls(){
       sceneControl.onChange(function(value){
         loadScene(value);
         if (paused){
-          drawCurrent();
+          water.drawCurrent();
         }
       });
 
