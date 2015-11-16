@@ -109,7 +109,7 @@ function flumeControls(){
 
 function loadControls(){
 			var text = new flumeControls();
-			var gui = new dat.GUI({autoPlace:false});
+			var gui = new dat.GUI({autoPlace:false});//
 
 
 			var folderTime = gui.addFolder('Time');
@@ -132,7 +132,7 @@ function loadControls(){
 			});
 
 			var customContainer = document.getElementById('controls');
-			customContainer.appendChild(gui.domElement);
+			 customContainer.appendChild(gui.domElement);
 }
 
 function createWater(surface, xmomentum, meshdata) {
