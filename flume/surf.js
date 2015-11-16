@@ -5,10 +5,10 @@ var canvasHeight = 500;
 //World constants.
 var gravity = 9.81;
 var hmin = 0;
+
 // Physical world.
 var water = [];
-
-
+var currentScene = "dambreak";
 // Time
 var simStep = 1 / 60; //30FPS
 var paused = false;
@@ -25,7 +25,7 @@ function init() {
     canvas = document.getElementById("myCanvas");
     simulation = document.getElementById("simulation");
 
-    //mouse event handlers
+    //mouse/touch event handlers
     canvas.onmousedown = onMouseDown;
     canvas.onmouseup = onMouseUp;
     canvas.onmousemove = onMouseMove;
@@ -36,16 +36,14 @@ function init() {
     canvas.addEventListener("touchmove", onTouchMove, false);
     canvas.addEventListener("touchend", onTouchEnd, false);
 
-
-		//window.onload = loadControls();
-
     //set the canvas context
     ctx = canvas.getContext("2d");
 
-
-    loadDambreak();
+    loadScene('dambreak');
+		initControls();
     resizeCanvas();
-		loadControls();
+
+
     setInterval(run, simStep * 1000);
 }
 
@@ -58,21 +56,6 @@ function resizeCanvas() {
 
 }
 
-function loadDambreak() {
-    //1D Dambreak, 10m height first half, 5m second half, 10m long.
-    var npoints = 100;
-    var L = 30;
-    var cfl = 0.45;
-    var surface = new Array(npoints);
-    var xmomentum = new Array(npoints);
-    ylim = [0, 11];
-
-    for (var i = 0; i < npoints; i++) {
-        surface[i] = (i < npoints / 2) ? 10 : 3;
-        xmomentum[i] = 0;
-    }
-    water = createWater(surface, xmomentum, [npoints, L, cfl]);
-}
 
 function drawScale() {
 
@@ -96,10 +79,11 @@ function drawScale() {
 }
 
 function flumeControls(){
+      this.scene = "dambreak";
 			this.clickWidth = water.sigma*2.;
 			this.clickStyle = 'spline';
 			this.restart = function(){
-				loadDambreak();
+				loadScene(currentScene);
 				if (paused)
 					water.drawCurrent();
 
@@ -107,10 +91,11 @@ function flumeControls(){
 			this.pause = function(){ paused = !paused};
 }
 
-function loadControls(){
+function initControls(){
 			var text = new flumeControls();
 			var gui = new dat.GUI({autoPlace:false});//
 
+      sceneControl = gui.add(text, "scene", ["dambreak", "rest"] ).name('Scene');
 
 			var folderTime = gui.addFolder('Time');
 			folderTime.add(text, 'restart').name('Restart');
@@ -131,9 +116,42 @@ function loadControls(){
 				water.clickStyle = value;
 			});
 
+      sceneControl.onChange(function(value){
+        loadScene(value);
+        if (paused){
+          drawCurrent();
+        }
+      });
+
 			var customContainer = document.getElementById('controls');
 			 customContainer.appendChild(gui.domElement);
 }
+
+function loadScene(scene) {
+    //1D Dambreak, 10m height first half, 5m second half, 10m long.
+    var npoints = 100;
+    var L = 30;
+    var cfl = 0.45;
+    var surface = new Array(npoints);
+    var xmomentum = new Array(npoints);
+    ylim = [0, 11];
+
+    if (scene=="dambreak"){
+      for (var i = 0; i < npoints; i++) {
+          surface[i] = (i < npoints / 2) ? 10 : 3;
+          xmomentum[i] = 0;
+      }
+    }
+    else if(scene=="rest"){
+      for (var i = 0; i < npoints; i++) {
+          surface[i] = 5.;
+          xmomentum[i] = 0;
+      }
+    }
+    water = createWater(surface, xmomentum, [npoints, L, cfl]);
+    currentScene = scene;
+}
+
 
 function createWater(surface, xmomentum, meshdata) {
     var water = [];
