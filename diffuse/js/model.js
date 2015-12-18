@@ -61,7 +61,7 @@ function init(){
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
-		boundaryCondition: {type: "i", value:0}
+		boundaryCondition: {type: "i", value:undefined}
 	};
 
 	setColorMap('blueInk');
@@ -195,15 +195,15 @@ function initControls() {
     })
 
 
-    // bcControl = gui.add(controls, "bc", ["fixed", "open"]).name("Boundaries");
-    // bcControl.onChange(function(value){
-    // 	if (value=="fixed"){
-    // 		mUniforms.boundaryCondition = 0;
-    // 	}
-    // 	else if (value=="open"){
-    // 		mUniforms.boundaryCondition = 1;
-    // 	}
-    // })
+    bcControl = gui.add(controls, "bc", ["fixed", "open"]).name("Boundaries");
+    bcControl.onChange(function(value){
+    	if (value=="fixed"){
+    		mUniforms.boundaryCondition.value = 0;
+    	}
+    	else if (value=="open"){
+    		mUniforms.boundaryCondition.value = 1;
+    	}
+    })
     // var customContainer = document.getElementById('controls');
     // customContainer.appendChild(gui.domElement);
 }
