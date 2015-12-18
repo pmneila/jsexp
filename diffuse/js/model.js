@@ -189,7 +189,7 @@ function diffuseControls(){
 function initControls() {
     var controls = new diffuseControls;
     var gui = new dat.GUI({
-        autoPlace: true
+        autoPlace: false
     }); //
 
     sceneControl = gui.add(controls, "scene", ["blueInk", "heat"]).name("Scene");
@@ -210,6 +210,6 @@ function initControls() {
     		mUniforms.boundaryCondition.value = 1;
     	}
     })
-    // var customContainer = document.getElementById('controls');
-    // customContainer.appendChild(gui.domElement);
+    var customContainer = document.getElementById('controls');
+    customContainer.appendChild(gui.domElement);
 }
