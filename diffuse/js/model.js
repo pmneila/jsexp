@@ -163,8 +163,8 @@ function setColorMap(cmap){
 function onMouseMove(e){
 	var ev = e ? e : window.event;
 
-	mousex = ev.pageX - container.offsetLeft;
-	mousey = ev.pageY - container.offsetTop;
+	mousex = ev.pageX - simulation.offsetLeft;
+	mousey = ev.pageY - simulation.offsetTop;
 
 	if (mouseDown)
 		mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
