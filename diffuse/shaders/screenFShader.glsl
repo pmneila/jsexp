@@ -1,7 +1,7 @@
 varying vec2 vUv;
 uniform sampler2D tSource;
 uniform vec2 delta;
-uniform vec4 colors[4];
+uniform vec4 colors[5];
 
 void main()
 {
@@ -15,11 +15,11 @@ void main()
     if(value <= colors[0].a){
         pseudoColor = colors[0].rgb;
     }
-    else if (value > colors[3].a){
-    	pseudoColor = colors[3].rgb;
+    else if (value > colors[4].a){
+    	pseudoColor = colors[4].rgb;
     }
     else{
-    	for (int i=1; i<4; i++){
+    	for (int i=1; i<5; i++){
 			vec4 cleft = colors[i-1];
 			vec4 cright = colors[i];
 
@@ -29,7 +29,7 @@ void main()
 				break;
 			}
 		}			
-	}                                  
+	}
 
     gl_FragColor = vec4(pseudoColor.r, pseudoColor.g,pseudoColor.b, 1.0); 
 }

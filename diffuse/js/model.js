@@ -37,21 +37,17 @@ function init(){
 	scene = new THREE.Scene();
 
 	// plane
-	planeheight=height/4, planewidth = width/4;//planeheight*screenRatio;
-	var colors = [new THREE.Vector4(0, 0, 0, 0.0),
-				new THREE.Vector4(1, 0, 0, 0.33),
-				new THREE.Vector4(1, 1, 0, 0.66),	
-				new THREE.Vector4(1, 1, 1, 0.99)];
-
+	planeheight=height/8, planewidth = width/8;//planeheight*screenRatio;
 
 	mUniforms = {
 		delta: {type:  "v2", value: new THREE.Vector2(1/planewidth,1/planeheight)},
 		tSource: {type: "t", value: undefined},
-		colors: {type: "v4v", value: colors},
+		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0}
 	};
 
+	setColorMap('blueInk');
 	// create buffers
 	mTextureBuffer1 = new THREE.WebGLRenderTarget( planewidth, planeheight, 
 		 					{minFilter: THREE.LinearFilter,
@@ -116,6 +112,25 @@ function renderSimulation(time){
 	requestAnimationFrame(renderSimulation);
 }
 
+function setColorMap(cmap){
+	var colors;
+	if (cmap=='heat'){
+		colors = [new THREE.Vector4(0, 0, 0, 0.0),
+				new THREE.Vector4(1, 0, 0, 0.33),
+				new THREE.Vector4(1, 1, 0, 0.66),	
+				new THREE.Vector4(1, 1, 1, 0.99),
+				new THREE.Vector4(1, 1, 1, 0.99)];
+	}
+	else if (cmap=='blueInk'){
+		colors = [new THREE.Vector4(1.0,1.0,1.0,0.0),
+				new THREE.Vector4(0.0,0.0,1.0,0.8),
+				new THREE.Vector4(0.0,0.0,1.0,0.8),
+				new THREE.Vector4(0.0,0.0,1.0,0.8),
+				new THREE.Vector4(0.0,0.0,1.0,0.8)];
+	}
+
+	mUniforms.colors.value = colors;
+}
 function onMouseMove(e){
 	var ev = e ? e : window.event;
 
