@@ -3,17 +3,28 @@ var camera, scene, renderer;
 
 var width, height;
 var toggleBuffer = false;
-var planeScreen;
+var planeScreen, planeheight, planewidth;
+
+var mousex, mousey, mouseDown=false;
 
 function init(){
-	// renderer
-	var width = Math.min(window.innerWidth,2*window.innerHeight);
-	var height = width/2;
+
+	// container
+	width = Math.min(window.innerWidth,2*window.innerHeight);
+	height = width/2;
 
 	container = document.getElementById( 'container' );
 	container.width = width;
 	container.height = height;
 
+	//event handlers
+	container.onmousedown = onMouseDown;
+	container.onmouseup = onMouseUp;
+	container.onmousemove = onMouseMove;
+	// container.o
+
+
+	//renderer
 	renderer = new THREE.WebGLRenderer({canvas:container, preserveDrawingBuffer: true});
 	renderer.setClearColor( 0xa0a0a0 );
 	renderer.setSize(width, height);
@@ -26,7 +37,7 @@ function init(){
 	scene = new THREE.Scene();
 
 	// plane
-	var planeheight=height/8, planewidth = width/8;//planeheight*screenRatio;
+	planeheight=height/4, planewidth = width/4;//planeheight*screenRatio;
 	var colors = [new THREE.Vector4(0, 0, 0, 0.0),
 				new THREE.Vector4(1, 0, 0, 0.33),
 				new THREE.Vector4(1, 1, 0, 0.66),	
@@ -37,6 +48,8 @@ function init(){
 		delta: {type:  "v2", value: new THREE.Vector2(1/planewidth,1/planeheight)},
 		tSource: {type: "t", value: undefined},
 		colors: {type: "v4v", value: colors},
+		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
+		mouseDown: {type: "i", value: 0}
 	};
 
 	// create buffers
@@ -101,4 +114,24 @@ function renderSimulation(time){
 	planeScreen.material = screenMaterial;
 	renderer.render(scene,camera);			
 	requestAnimationFrame(renderSimulation);
+}
+
+function onMouseMove(e){
+	var ev = e ? e : window.event;
+
+	mousex = ev.pageX - container.offsetLeft;
+	mousey = ev.pageY - container.offsetTop;
+
+	if (mouseDown)
+		mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
+}
+function onMouseDown(e){
+	mouseDown = true;
+	mUniforms.mouseDown.value = 1;
+	mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
+}
+
+function onMouseUp(e){
+	mouseDown = false;
+	mUniforms.mouseDown.value = 0;
 }
