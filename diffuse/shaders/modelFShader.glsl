@@ -1,0 +1,43 @@
+varying vec2 vUv;
+uniform sampler2D tSource;
+uniform vec2 delta;
+void main()
+{
+//neighbors values
+float u_ij = texture2D(tSource, vUv).r;
+float u_imj = texture2D(tSource, vUv+vec2(-1.0*delta.x,0.0)).r;
+float u_ipj = texture2D(tSource, vUv+vec2(delta.x,0.0)).r;
+float u_ijm = texture2D(tSource, vUv+vec2(0.0,-1.0*delta.y)).r;
+float u_ijp = texture2D(tSource, vUv+vec2(0.0,delta.y)).r;
+
+float dt = 0.2*delta.x*delta.x;
+// gl_FragColor = vec4(delta.x, 0., 0., 1.);
+//boundaries
+if (vUv.x <=2.0*delta.x){
+	gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+	return;
+}
+else if (vUv.x >=1.0-2.0*delta.x){
+	gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+	return;
+}
+
+if (vUv.y <=2.0*delta.y){
+	u_ij = (1.0-vUv.x)*(1.0-vUv.x)*(1.0-vUv.x);
+	gl_FragColor = vec4(u_ij,0.0,0.0,1.0);
+	return;
+}
+else if (vUv.y>=1.0-2.0*delta.y) {
+	u_ij = (1.0-vUv.x)*(1.0-vUv.x)*(1.0-vUv.x);
+	gl_FragColor = vec4(u_ij,0.0,0.0,1.0);
+	return;
+}
+
+//interior: u^{n+1}
+//faltan uniformss!!
+float u_np = u_ij + dt/(delta.x*delta.x)*(u_imj+u_ipj+u_ijm+u_ijp-4.0*u_ij);
+// u_np = 1.0-vUv.x;
+
+gl_FragColor = vec4(u_np,0.,0.,1.);
+
+}
