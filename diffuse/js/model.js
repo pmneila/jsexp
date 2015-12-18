@@ -7,15 +7,31 @@ var planeScreen, planeheight, planewidth;
 
 var mousex, mousey, mouseDown=false;
 
+var info
+var time=0;
+var speed = 1;
+
 function init(){
-
+	// width = Math.min(
+	// 	$("#container").parent().width(),
+	// 	$("#container").parent().height());
+	width = Math.min(
+		window.innerWidth,
+		window.innerHeight)*0.95;
+	height = width;
+	
 	// container
-	width = Math.min(window.innerWidth,2*window.innerHeight);
-	height = width/2;
-
+	simulationDiv = document.getElementById('simulation');
 	container = document.getElementById( 'container' );
 	container.width = width;
 	container.height = height;
+
+	info = document.createElement( 'div' );
+	info.style.position = 'absolute';
+	info.style.top = '10px';
+	info.style.width = '100%';
+	info.style.textAlign = 'center';
+	simulationDiv.appendChild( info );	
 
 	//event handlers
 	container.onmousedown = onMouseDown;
@@ -44,10 +60,13 @@ function init(){
 		tSource: {type: "t", value: undefined},
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
-		mouseDown: {type: "i", value: 0}
+		mouseDown: {type: "i", value: 0},
+		boundaryCondition: {type: "i", value:0}
 	};
 
 	setColorMap('blueInk');
+
+	initControls();
 	// create buffers
 	mTextureBuffer1 = new THREE.WebGLRenderTarget( planewidth, planeheight, 
 		 					{minFilter: THREE.LinearFilter,
@@ -89,11 +108,10 @@ function init(){
 	renderSimulation(0);
 }
 
-function renderSimulation(time){
-	
+function renderSimulation(){	
 
 	planeScreen.material = modelMaterial;
-	for (var i=0; i<64; i++){
+	for (var i=0; i<Math.floor(speed); i++){
 		if (toggleBuffer){
 			mUniforms.tSource.value = mTextureBuffer1;		
 			renderer.render(scene, camera, mTextureBuffer2, true);
@@ -110,6 +128,11 @@ function renderSimulation(time){
 	planeScreen.material = screenMaterial;
 	renderer.render(scene,camera);			
 	requestAnimationFrame(renderSimulation);
+
+	//time=time+0.2*1/planewidth*1/planewidth*100;
+	//para hablar de tiempo hay que configurar bien
+	// la constante de difusividad del medio!!!
+	// info.innerHTML = time.toFixed(6);
 }
 
 function setColorMap(cmap){
@@ -149,4 +172,38 @@ function onMouseDown(e){
 function onMouseUp(e){
 	mouseDown = false;
 	mUniforms.mouseDown.value = 0;
+}
+
+
+function diffuseControls(){
+	this.scene = "Blue Ink";
+	this.bc = "open";
+	this.speed = 1;
+}
+function initControls() {
+    var controls = new diffuseControls;
+    var gui = new dat.GUI({
+        autoPlace: true
+    }); //
+
+    sceneControl = gui.add(controls, "scene", ["blueInk", "heat"]).name("Scene");
+    sceneControl.onChange(setColorMap);
+
+    speedControl = gui.add(controls, "speed", 1, 10).name('Speed');
+    speedControl.onChange(function(value){
+    	speed = Math.floor(value);
+    })
+
+
+    // bcControl = gui.add(controls, "bc", ["fixed", "open"]).name("Boundaries");
+    // bcControl.onChange(function(value){
+    // 	if (value=="fixed"){
+    // 		mUniforms.boundaryCondition = 0;
+    // 	}
+    // 	else if (value=="open"){
+    // 		mUniforms.boundaryCondition = 1;
+    // 	}
+    // })
+    // var customContainer = document.getElementById('controls');
+    // customContainer.appendChild(gui.domElement);
 }
