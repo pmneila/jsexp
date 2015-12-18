@@ -9,6 +9,9 @@
 		<script src="js/dat.gui.min.js"></script>				
 		<script src="js/model.js"></script>
 		<script>
+			var vshader = 'shaders/vshader.glsl';
+			var mFshader = 'shaders/modelFShader.glsl';
+			var sFshader = 'shaders/screenFShader.glsl';		
 			$(function(){
 				init();
 			});
@@ -17,11 +20,8 @@
 
 	<body>
 		<div id="simulation">
-			<canvas id="container" style="width:1024px;height:512px" ></canvas>
+			<canvas id="container" style="width:1024px;height:512px;border:1px solid #d0d0d0;" ></canvas>
 		</div>
-
-		<script type="text/javascript"
-	  	src="https://rawgit.com/jgalazm/waterexp/master/diffuse/model.js"></script>
 	</body>
 
 

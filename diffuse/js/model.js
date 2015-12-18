@@ -11,6 +11,12 @@ var info
 var time=0;
 var speed = 1;
 
+
+
+//------------------------------------------------------
+//it requires variables: vshader, mFshader and sFshader
+//with url's of vertex/fragment shaders to work.
+//------------------------------------------------------
 function init(){
 	// width = Math.min(
 	// 	$("#container").parent().width(),
@@ -88,14 +94,14 @@ function init(){
 
 	modelMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
-		vertexShader: $.ajax('shaders/vshader.glsl',{async:false}).responseText,
-		fragmentShader: $.ajax('shaders/modelFShader.glsl',{async:false}).responseText
+		vertexShader: $.ajax(vshader, {async:false}).responseText,
+		fragmentShader: $.ajax(mFshader,{async:false}).responseText
 	});
 
 	screenMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
-		vertexShader: $.ajax('shaders/vshader.glsl',{async:false}).responseText,
-		fragmentShader: $.ajax('shaders/screenFShader.glsl',{async:false}).responseText
+		vertexShader: $.ajax(vshader,{async:false}).responseText,
+		fragmentShader: $.ajax(sFshader,{async:false}).responseText
 	});
 
 	//create plane geometry
