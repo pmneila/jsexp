@@ -66,7 +66,7 @@ void main()
 
 		if (mouseDown==1){
 			vec2 dist = mouse-vUv;
-			if (length(dist)<=delta.x*brushWidth){
+			if (length(dist)<=brushWidth){
 				u_np += heatSourceSign*heatIntensity;//*dt, but then it should also
 				//have the diffusivity constant of the material in the equation.
 				//anyway, everything is the same up to scaling by some space
@@ -79,7 +79,7 @@ void main()
 	else{
 		if (mouseDown==1){
 			vec2 dist = mouse-vUv;
-			if (length(dist)<=delta.x*brushWidth){
+			if (length(dist)<=brushWidth){
 				u_ij += heatSourceSign*heatIntensity;//*dt, but then it should also
 				//have the diffusivity constant of the material in the equation.
 				//anyway, everything is the same up to scaling by some space

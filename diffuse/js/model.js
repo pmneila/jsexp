@@ -3,7 +3,7 @@ var camera, scene, renderer;
 
 var width, height;
 var toggleBuffer = false;
-var planeScreen, planeheight, planewidth;
+var planeScreen;
 
 var mousex, mousey, mouseDown=false, rightClick=false;
 
@@ -11,6 +11,7 @@ var info
 var time=0;
 var speed = 1;
 
+var mTextureBuffer1, mTextureBuffer2;
 
 
 //------------------------------------------------------
@@ -18,9 +19,6 @@ var speed = 1;
 //with url's of vertex/fragment shaders to work.
 //------------------------------------------------------
 function init(){
-	// width = Math.min(
-	// 	$("#container").parent().width(),
-	// 	$("#container").parent().height());
 	width = Math.min(
 		window.innerWidth,
 		window.innerHeight)*0.95;
@@ -60,43 +58,24 @@ function init(){
 	scene = new THREE.Scene();
 
 	// plane
-	planeheight=height/8, planewidth = width/8;//planeheight*screenRatio;
 
 	mUniforms = {
-		delta: {type:  "v2", value: new THREE.Vector2(1/planewidth,1/planeheight)},
+		delta: {type:  "v2", value: undefined},
 		tSource: {type: "t", value: undefined},
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
 		boundaryCondition: {type: "i", value:undefined},
 		heatSourceSign: {type: "f", value:1},
-		heatIntensity: {type: "f", value:0.1},
-		brushWidth: {type: "f", value:5},
+		heatIntensity: {type: "f", value:0.4},
+		brushWidth: {type: "f", value:0.05},
 		pause: {type: 'i', value:0}
 	};
 
-	setColorMap('blueInk');
-
-	initControls();
 	// create buffers
-	mTextureBuffer1 = new THREE.WebGLRenderTarget( planewidth, planeheight, 
-		 					{minFilter: THREE.LinearFilter,
-	                         magFilter: THREE.LinearFilter,
-	                         format: THREE.RGBAFormat,
-	                         type: THREE.FloatType});
-	mTextureBuffer2 = new THREE.WebGLRenderTarget( planewidth, planeheight, 
-		 					{minFilter: THREE.LinearFilter,
-	                         magFilter: THREE.LinearFilter,
-	                         format: THREE.RGBAFormat,
-	                         type: THREE.FloatType});
+	resizeSimulation(128,128);
 
-	mTextureBuffer1.texture.wrapS  = THREE.RepeatWrapping;
-	mTextureBuffer1.texture.wrapT  = THREE.RepeatWrapping;
-	mTextureBuffer2.texture.wrapS  = THREE.RepeatWrapping;
-	mTextureBuffer2.texture.wrapT  = THREE.RepeatWrapping;
-
-	// create materials
-
+	// create material
 	modelMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
 		vertexShader: $.ajax(vshader, {async:false}).responseText,
@@ -114,11 +93,51 @@ function init(){
 	planeScreen = new THREE.Mesh( geometry, screenMaterial );
 	scene.add( planeScreen );	
 
+
+	//default colormap
+	setColorMap('blueInk');
+
+	//GUI controls
+	initControls();
+
 	//----run the simulation---
 	var toggleBuffer = false;
 	renderSimulation(0);
 }
 
+function resizeSimulation(nx,ny){
+
+	mUniforms.delta.value = new THREE.Vector2(1/nx,1/ny);
+	
+	// create buffers
+	if (!mTextureBuffer1){
+
+	mTextureBuffer1 = new THREE.WebGLRenderTarget( nx, ny, 
+		 					{minFilter: THREE.LinearFilter,
+	                         magFilter: THREE.LinearFilter,
+	                         format: THREE.RGBAFormat,
+	                         type: THREE.FloatType});
+	mTextureBuffer2 = new THREE.WebGLRenderTarget( nx, ny, 
+		 					{minFilter: THREE.LinearFilter,
+	                         magFilter: THREE.LinearFilter,
+	                         format: THREE.RGBAFormat,
+	                         type: THREE.FloatType});
+
+	mTextureBuffer1.texture.wrapS  = THREE.RepeatWrapping;
+	mTextureBuffer1.texture.wrapT  = THREE.RepeatWrapping;
+	mTextureBuffer2.texture.wrapS  = THREE.RepeatWrapping;
+	mTextureBuffer2.texture.wrapT  = THREE.RepeatWrapping;
+	}
+	else{
+		if (!toggleBuffer){
+			mTextureBuffer1.setSize(nx,ny);
+		}	
+		else{
+			mTextureBuffer2.setSize(nx,ny);	
+		}
+	
+	}
+}
 function renderSimulation(){	
 
 	planeScreen.material = modelMaterial;
@@ -139,41 +158,27 @@ function renderSimulation(){
 	planeScreen.material = screenMaterial;
 	renderer.render(scene,camera);			
 	requestAnimationFrame(renderSimulation);
-
-	//time=time+0.2*1/planewidth*1/planewidth*100;
-	//para hablar de tiempo hay que configurar bien
-	// la constante de difusividad del medio!!!
-	// info.innerHTML = time.toFixed(6);
 }
 
 function setColorMap(cmap){
 	var colors;
 	if (cmap=='heat'){
-		colors = [new THREE.Vector4(0, 0, 0, 0.0),
+		colors = [new THREE.Vector4(1, 1, 1, -10),
+				new THREE.Vector4(0, 1, 1, -6.6),
+				new THREE.Vector4(0, 0, 1, -3.3),
 				new THREE.Vector4(0, 0, 0, 0.0),
-				new THREE.Vector4(0, 0, 0, 0.0),
-				new THREE.Vector4(0, 0, 0, 0.0),
-				new THREE.Vector4(1, 0, 0, 0.33),
-				new THREE.Vector4(1, 1, 0, 0.66),	
-				new THREE.Vector4(1, 1, 1, 0.99)];
-	}
-	if (cmap=='cold-hot'){
-		colors = [new THREE.Vector4(1, 1, 1, -0.99),
-				new THREE.Vector4(0, 1, 1, -0.66),
-				new THREE.Vector4(0, 0, 1, -0.33),
-				new THREE.Vector4(0, 0, 0, 0.0),
-				new THREE.Vector4(1, 0, 0, 0.33),
-				new THREE.Vector4(1, 1, 0, 0.66),	
-				new THREE.Vector4(1, 1, 1, 0.99)];
+				new THREE.Vector4(1, 0, 0, 3.3),
+				new THREE.Vector4(1, 1, 0, 6.6),	
+				new THREE.Vector4(1, 1, 1, 9.9)];
 	}	
 	else if (cmap=='blueInk'){
-		colors = [new THREE.Vector4(1.0,1.0,1.0,0.0),
-				new THREE.Vector4(0.0,0.0,1.0,0.8),
-				new THREE.Vector4(0.0,0.0,1.0,0.8),
-				new THREE.Vector4(0.0,0.0,1.0,0.8),
-				new THREE.Vector4(0.0,0.0,1.0,0.8),
-				new THREE.Vector4(0.0,0.0,1.0,0.8),
-				new THREE.Vector4(0.0,0.0,1.0,0.8)];
+		colors = [new THREE.Vector4(1, 1, 1, 0),
+				new THREE.Vector4(0, 0, 1, 1.0),
+				new THREE.Vector4(0, 0, 1, 10.0),
+				new THREE.Vector4(0, 0, 1, 10.0),
+				new THREE.Vector4(0, 0, 1, 10.0),
+				new THREE.Vector4(0, 0, 1, 10.0),	
+				new THREE.Vector4(0, 0, 1, 10.0),];
 	}
 
 	mUniforms.colors.value = colors;
@@ -209,11 +214,18 @@ function onMouseUp(e){
 function diffuseControls(){
 	this.scene = "Blue Ink";
 	this.bc = "fixed";
-	this.speed = 1;
-	this.brushWidth = 5;
-	this.Intensity = 0.1;
+	this.resolution = 1/mUniforms.delta.value.x;
+	this.brushWidth = mUniforms.brushWidth.value;
+	this.intensity = mUniforms.heatIntensity.value;
 	this.pause = function(){
 		 mUniforms.pause.value  = 1 - mUniforms.pause.value;
+	}
+	this.speed = 1;
+	this.clearScreen = function(){
+		var nx = Math.floor(1/mUniforms.delta.value.x);
+		var ny = Math.floor(1/mUniforms.delta.value.y);
+		mTextureBuffer1 = undefined;
+		resizeSimulation(nx,ny);
 	}
 }
 function initControls() {
@@ -223,12 +235,14 @@ function initControls() {
     }); 
 
     // Scene (colormap)
+
     sceneControl = gui.add(controls, "scene",
-    	 ["blueInk", "cold-hot", "heat"]).name("Scene");
+    	 ["blueInk", "heat"]).name("Scene");
     sceneControl.onChange(setColorMap);
 
 
     //boundary condition
+
     bcControl = gui.add(controls, "bc", ["fixed value", "closed"]).name("Boundaries");
     bcControl.onChange(function(value){
     	if (value=="fixed value"){
@@ -239,18 +253,31 @@ function initControls() {
     	}
     })
 
+    //mesh resolution
+
+	resolutionControl = gui.add(controls, "resolution", 16, 512).name('Resolution');
+    resolutionControl.onChange(function(value){
+    	resizeSimulation(value,value);
+    	//resizeSimulation(value,value,1);
+    });
+
+
     //brush
-    brushWidthControl = gui.add(controls, "brushWidth", 1, 20).name('Brush Width');
+
+    brushWidthControl = gui.add(controls, "brushWidth", 0.01, 1).name('Brush Width');
     brushWidthControl.onChange(function(value){
     	mUniforms.brushWidth.value = value;
     });
 
-    //brush
-    heatIntensityControl = gui.add(controls, "Intensity", 0.001, 1).name('Intensity');
+    //heat/concentration source intensity
+
+    heatIntensityControl = gui.add(controls, "intensity", 0.01, 5).name('Intensity');
     heatIntensityControl.onChange(function(value){
     	mUniforms.heatIntensity.value = value;
     });
+
     //speed
+
     speedControl = gui.add(controls, "speed", 1, 20).name('Speed');
     speedControl.onChange(function(value){
     	speed = Math.floor(value);
@@ -259,7 +286,12 @@ function initControls() {
     //pause
     pauseControl = gui.add(controls, "pause").name('Pause');
 
+    //clear screen control
+
+ 	clearControl = gui.add(controls, "clearScreen").name("Clear");
+
     //own separate container
+
     var customContainer = document.getElementById('controls');
     customContainer.appendChild(gui.domElement);
 }
