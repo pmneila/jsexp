@@ -5,6 +5,7 @@ uniform vec2 mouse;
 uniform int mouseDown;
 uniform int boundaryCondition;
 uniform float heatSourceSign;
+uniform float heatIntensity;
 uniform float brushWidth;
 uniform int pause;
 void main()
@@ -15,10 +16,11 @@ void main()
 	float u_ipj = texture2D(tSource, vUv+vec2(delta.x,0.0)).r;
 	float u_ijm = texture2D(tSource, vUv+vec2(0.0,-1.0*delta.y)).r;
 	float u_ijp = texture2D(tSource, vUv+vec2(0.0,delta.y)).r;
+	float dt = 0.2*delta.x*delta.x;
+
 	if (pause==0){
 
 
-		float dt = 0.2*delta.x*delta.x;
 
 		//boundaries
 		if (boundaryCondition == 0){
@@ -65,7 +67,10 @@ void main()
 		if (mouseDown==1){
 			vec2 dist = mouse-vUv;
 			if (length(dist)<=delta.x*brushWidth){
-				u_np += 0.1*heatSourceSign;
+				u_np += heatSourceSign*heatIntensity;//*dt, but then it should also
+				//have the diffusivity constant of the material in the equation.
+				//anyway, everything is the same up to scaling by some space
+				//and time constants, so it does not really matter.
 			}
 		}
 
@@ -75,7 +80,10 @@ void main()
 		if (mouseDown==1){
 			vec2 dist = mouse-vUv;
 			if (length(dist)<=delta.x*brushWidth){
-				u_ij += 0.1*heatSourceSign;
+				u_ij += heatSourceSign*heatIntensity;//*dt, but then it should also
+				//have the diffusivity constant of the material in the equation.
+				//anyway, everything is the same up to scaling by some space
+				//and time constants, so it does not really matter.
 			}
 		}		
 		gl_FragColor = vec4(u_ij,0.0,0.0,1.0);

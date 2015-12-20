@@ -70,6 +70,7 @@ function init(){
 		mouseDown: {type: "i", value: 0},
 		boundaryCondition: {type: "i", value:undefined},
 		heatSourceSign: {type: "f", value:1},
+		heatIntensity: {type: "f", value:0.1},
 		brushWidth: {type: "f", value:5},
 		pause: {type: 'i', value:0}
 	};
@@ -210,6 +211,7 @@ function diffuseControls(){
 	this.bc = "fixed";
 	this.speed = 1;
 	this.brushWidth = 5;
+	this.Intensity = 0.1;
 	this.pause = function(){
 		 mUniforms.pause.value  = 1 - mUniforms.pause.value;
 	}
@@ -240,9 +242,14 @@ function initControls() {
     //brush
     brushWidthControl = gui.add(controls, "brushWidth", 1, 20).name('Brush Width');
     brushWidthControl.onChange(function(value){
-    	mUniforms.brushWidth.value = Math.floor(value);
+    	mUniforms.brushWidth.value = value;
     });
 
+    //brush
+    heatIntensityControl = gui.add(controls, "Intensity", 0.001, 1).name('Intensity');
+    heatIntensityControl.onChange(function(value){
+    	mUniforms.heatIntensity.value = value;
+    });
     //speed
     speedControl = gui.add(controls, "speed", 1, 20).name('Speed');
     speedControl.onChange(function(value){
