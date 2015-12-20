@@ -69,7 +69,9 @@ function init(){
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
 		boundaryCondition: {type: "i", value:undefined},
-		heatSourceSign: {type: "f", value:1}
+		heatSourceSign: {type: "f", value:1},
+		brushWidth: {type: "f", value:5},
+		pause: {type: 'i', value:0}
 	};
 
 	setColorMap('blueInk');
@@ -205,34 +207,52 @@ function onMouseUp(e){
 
 function diffuseControls(){
 	this.scene = "Blue Ink";
-	this.bc = "open";
+	this.bc = "fixed";
 	this.speed = 1;
+	this.brushWidth = 5;
+	this.pause = function(){
+		 mUniforms.pause.value  = 1 - mUniforms.pause.value;
+	}
 }
 function initControls() {
     var controls = new diffuseControls;
     var gui = new dat.GUI({
         autoPlace: false
-    }); //
+    }); 
 
+    // Scene (colormap)
     sceneControl = gui.add(controls, "scene",
-    	 ["blueInk", "heat", "cold-hot"]).name("Scene");
+    	 ["blueInk", "cold-hot", "heat"]).name("Scene");
     sceneControl.onChange(setColorMap);
 
-    speedControl = gui.add(controls, "speed", 1, 10).name('Speed');
-    speedControl.onChange(function(value){
-    	speed = Math.floor(value);
-    })
 
-
-    bcControl = gui.add(controls, "bc", ["fixed", "open"]).name("Boundaries");
+    //boundary condition
+    bcControl = gui.add(controls, "bc", ["fixed value", "closed"]).name("Boundaries");
     bcControl.onChange(function(value){
-    	if (value=="fixed"){
+    	if (value=="fixed value"){
     		mUniforms.boundaryCondition.value = 0;
     	}
-    	else if (value=="open"){
+    	else if (value=="closed"){
     		mUniforms.boundaryCondition.value = 1;
     	}
     })
+
+    //brush
+    brushWidthControl = gui.add(controls, "brushWidth", 1, 20).name('Brush Width');
+    brushWidthControl.onChange(function(value){
+    	mUniforms.brushWidth.value = Math.floor(value);
+    });
+
+    //speed
+    speedControl = gui.add(controls, "speed", 1, 20).name('Speed');
+    speedControl.onChange(function(value){
+    	speed = Math.floor(value);
+    });  
+
+    //pause
+    pauseControl = gui.add(controls, "pause").name('Pause');
+
+    //own separate container
     var customContainer = document.getElementById('controls');
     customContainer.appendChild(gui.domElement);
 }
