@@ -4,6 +4,7 @@ uniform vec2 delta;
 uniform vec2 mouse;
 uniform int mouseDown;
 uniform int boundaryCondition;
+uniform float heatSourceSign;
 void main()
 {
 //neighbors values
@@ -59,7 +60,7 @@ float u_np = u_ij + dt/(delta.x*delta.x)*(u_imj+u_ipj+u_ijm+u_ijp-4.0*u_ij);
 if (mouseDown==1){
 	vec2 dist = mouse-vUv;
 	if (length(dist)<=0.05){
-		u_np += 0.1;
+		u_np += 0.1*heatSourceSign;
 	}
 }
 

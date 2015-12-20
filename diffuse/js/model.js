@@ -5,7 +5,7 @@ var width, height;
 var toggleBuffer = false;
 var planeScreen, planeheight, planewidth;
 
-var mousex, mousey, mouseDown=false;
+var mousex, mousey, mouseDown=false, rightClick=false;
 
 var info
 var time=0;
@@ -43,6 +43,7 @@ function init(){
 	container.onmousedown = onMouseDown;
 	container.onmouseup = onMouseUp;
 	container.onmousemove = onMouseMove;
+	container.oncontextmenu = function(){return false};
 	// container.o
 
 
@@ -67,7 +68,8 @@ function init(){
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
-		boundaryCondition: {type: "i", value:undefined}
+		boundaryCondition: {type: "i", value:undefined},
+		heatSourceSign: {type: "f", value:1}
 	};
 
 	setColorMap('blueInk');
@@ -145,13 +147,26 @@ function setColorMap(cmap){
 	var colors;
 	if (cmap=='heat'){
 		colors = [new THREE.Vector4(0, 0, 0, 0.0),
+				new THREE.Vector4(0, 0, 0, 0.0),
+				new THREE.Vector4(0, 0, 0, 0.0),
+				new THREE.Vector4(0, 0, 0, 0.0),
 				new THREE.Vector4(1, 0, 0, 0.33),
 				new THREE.Vector4(1, 1, 0, 0.66),	
-				new THREE.Vector4(1, 1, 1, 0.99),
 				new THREE.Vector4(1, 1, 1, 0.99)];
 	}
+	if (cmap=='cold-hot'){
+		colors = [new THREE.Vector4(1, 1, 1, -0.99),
+				new THREE.Vector4(0, 1, 1, -0.66),
+				new THREE.Vector4(0, 0, 1, -0.33),
+				new THREE.Vector4(0, 0, 0, 0.0),
+				new THREE.Vector4(1, 0, 0, 0.33),
+				new THREE.Vector4(1, 1, 0, 0.66),	
+				new THREE.Vector4(1, 1, 1, 0.99)];
+	}	
 	else if (cmap=='blueInk'){
 		colors = [new THREE.Vector4(1.0,1.0,1.0,0.0),
+				new THREE.Vector4(0.0,0.0,1.0,0.8),
+				new THREE.Vector4(0.0,0.0,1.0,0.8),
 				new THREE.Vector4(0.0,0.0,1.0,0.8),
 				new THREE.Vector4(0.0,0.0,1.0,0.8),
 				new THREE.Vector4(0.0,0.0,1.0,0.8),
@@ -166,12 +181,19 @@ function onMouseMove(e){
 	mousex = ev.pageX - simulation.offsetLeft;
 	mousey = ev.pageY - simulation.offsetTop;
 
-	if (mouseDown)
+	if (mouseDown){
 		mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
+	}
 }
 function onMouseDown(e){
 	mouseDown = true;
 	mUniforms.mouseDown.value = 1;
+	if (e.which == 3){
+		mUniforms.heatSourceSign.value = -1;
+	}
+	else {
+		mUniforms.heatSourceSign.value =  1;
+	}
 	mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
 }
 
@@ -192,7 +214,8 @@ function initControls() {
         autoPlace: false
     }); //
 
-    sceneControl = gui.add(controls, "scene", ["blueInk", "heat"]).name("Scene");
+    sceneControl = gui.add(controls, "scene",
+    	 ["blueInk", "heat", "cold-hot"]).name("Scene");
     sceneControl.onChange(setColorMap);
 
     speedControl = gui.add(controls, "speed", 1, 10).name('Speed');
