@@ -12,7 +12,7 @@ var time=0;
 var speed = 1;
 
 var mTextureBuffer1, mTextureBuffer2, initTextureBuffer;
-var screenMaterial, modelMaterial;
+var screenMaterial, modelMaterial, initialMaterial;
 var imagen;
 
 
@@ -67,14 +67,14 @@ function init(){
 	camera = new THREE.OrthographicCamera( -0.5, 0.5, 0.5, -0.5, - 500, 1000 );
 	scene = new THREE.Scene();
 
-	// plane
+	// uniforms
 	mUniforms = {
 		delta: {type:  "v2", value: undefined},
 		tSource: {type: "t", value: mMap},
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
-		boundaryCondition: {type: "i", value:undefined},
+		boundaryCondition: {type: "i", value:1},
 		heatSourceSign: {type: "f", value:1},
 		heatIntensity: {type: "f", value:0.4},
 		brushWidth: {type: "f", value:0.1},
@@ -83,6 +83,12 @@ function init(){
 
 
 	// create material
+	initialMaterial = new THREE.ShaderMaterial({
+		uniforms: mUniforms,
+		vertexShader: $.ajax(vshader, {async:false}).responseText,
+		fragmentShader: $.ajax(iFshader,{async:false}).responseText
+	});
+
 	modelMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
 		vertexShader: $.ajax(vshader, {async:false}).responseText,
@@ -102,31 +108,16 @@ function init(){
 
 	//default colormap
 	setColorMap('heat');
+ 
 
-
-
-	// create buffers
-	// resizeSimulation(128,128);
-
-	
-    // mMap = new THREE.Texture(lena);
-    // mMap = new THREE.ImageUtils.loadTexture("img/diffuse.png");
-	
-	// imagen = new Image();
-	// imagen.src = "img/diffuse.png";
-	// imagen.onload = function(){resizeSimulation(128,128)};	    
-
-	// instantiate a loader
+	// Load the simulation
 	var loader = new THREE.ImageLoader();
-
-	// load a image resource
 	loader.load(
 		// resource URL
-		'img/diffuse.png',
+		'img/diffuse1.png',
 		// Function when resource is loaded
-		function ( image ) {
-			initTextureBuffer = new THREE.Texture(image);
-			resizeSimulation(128,128);
+		function ( image ) {			
+			runSimulation(image);
 		},
 		// Function called when download progresses
 		function ( xhr ) {
@@ -138,8 +129,38 @@ function init(){
 		}
 	);
 
+}
 
+function runSimulation(initial_condition){
 
+	//create simulation buffers
+
+	resizeSimulation(512,512);
+
+	//add GUI controls
+
+	initControls();
+
+	//set initial condition
+
+	initTextureBuffer = new THREE.Texture(initial_condition);
+    initTextureBuffer.wrapS = THREE.ClampToEdgeWrapping; // are these necessary?
+    initTextureBuffer.wrapT = THREE.ClampToEdgeWrapping;
+    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
+    initTextureBuffer.needsUpdate = true; //this IS necessary
+
+    //do the THING
+
+	planeScreen.material = initialMaterial;
+	mUniforms.tSource.value = initTextureBuffer;
+	renderer.render(scene, camera, mTextureBuffer1, true);
+	renderer.render(scene, camera, mTextureBuffer2, true);
+	mUniforms.tSource.value = mTextureBuffer1;
+	planeScreen.material = screenMaterial;
+	renderer.render(scene,camera);
+
+	//----proceed with the simulation---
+	renderSimulation();
 }
 
 function resizeSimulation(nx,ny){
@@ -160,10 +181,10 @@ function resizeSimulation(nx,ny){
 	                         format: THREE.RGBAFormat,
 	                         type: THREE.FloatType});
 
-	// mTextureBuffer1.texture.wrapS  = THREE.RepeatWrapping;
-	// mTextureBuffer1.texture.wrapT  = THREE.RepeatWrapping;
-	// mTextureBuffer2.texture.wrapS  = THREE.RepeatWrapping;
-	// mTextureBuffer2.texture.wrapT  = THREE.RepeatWrapping;
+	mTextureBuffer1.texture.wrapS  = THREE.ClampToEdgeWrapping;
+	mTextureBuffer1.texture.wrapT  = THREE.ClampToEdgeWrapping;
+	mTextureBuffer2.texture.wrapS  = THREE.ClampToEdgeWrapping;
+	mTextureBuffer2.texture.wrapT  = THREE.ClampToEdgeWrapping;
 	}
 	else{
 		if (!toggleBuffer){
@@ -175,30 +196,6 @@ function resizeSimulation(nx,ny){
 	
 	}
 
-	if (initCondition){
-		//execute the first time
-
-		//add GUI controls
-		initControls();
-
-	    initTextureBuffer.wrapS = THREE.RepeatWrapping;
-	    initTextureBuffer.wrapT = THREE.RepeatWrapping;
-	    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
-	    initTextureBuffer.needsUpdate = true;
-
-		planeScreen.material = modelMaterial;
-		mUniforms.tSource.value = initTextureBuffer;
-		renderer.render(scene, camera, mTextureBuffer1, true);
-		mUniforms.tSource.value = mTextureBuffer1;
-		planeScreen.material = screenMaterial;
-		renderer.render(scene,camera);
-		initCondition = 0;
-
-		//render this texture to the screen	
-		//----run the simulation---
-		renderSimulation();	
-
-	}
 }
 function renderSimulation(){	
 
@@ -306,7 +303,7 @@ function onTouchEnd(e) {
 
 function diffuseControls(){
 	this.scene = "heat";
-	this.bc = "fixed";
+	this.bc = (mUniforms.boundaryCondition.value == 0) ? "fixed value" : "closed";
 	this.resolution = 1/mUniforms.delta.value.x;
 	this.brushWidth = mUniforms.brushWidth.value;
 	this.intensity = mUniforms.heatIntensity.value;
