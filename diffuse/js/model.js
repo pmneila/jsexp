@@ -11,14 +11,20 @@ var info
 var time=0;
 var speed = 1;
 
-var mTextureBuffer1, mTextureBuffer2;
-var screenMaterial, modelMaterial;
+var mTextureBuffer1, mTextureBuffer2, initTextureBuffer;
+var screenMaterial, modelMaterial, initialMaterial;
+var imagen;
+
+
+
+var mMap, initCondition = 1;
 
 //------------------------------------------------------
 //it requires variables: vshader, mFshader and sFshader
 //with url's of vertex/fragment shaders to work.
 //------------------------------------------------------
 function init(){
+	console.log('asdf');
 	width = Math.min(
 		window.innerWidth,
 		window.innerHeight)*0.95;
@@ -61,25 +67,28 @@ function init(){
 	camera = new THREE.OrthographicCamera( -0.5, 0.5, 0.5, -0.5, - 500, 1000 );
 	scene = new THREE.Scene();
 
-	// plane
-
+	// uniforms
 	mUniforms = {
 		delta: {type:  "v2", value: undefined},
-		tSource: {type: "t", value: undefined},
+		tSource: {type: "t", value: mMap},
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
-		boundaryCondition: {type: "i", value:undefined},
+		boundaryCondition: {type: "i", value:1},
 		heatSourceSign: {type: "f", value:1},
 		heatIntensity: {type: "f", value:0.4},
 		brushWidth: {type: "f", value:0.1},
 		pause: {type: 'i', value:0}
 	};
 
-	// create buffers
-	resizeSimulation(128,128);
 
 	// create material
+	initialMaterial = new THREE.ShaderMaterial({
+		uniforms: mUniforms,
+		vertexShader: $.ajax(vshader, {async:false}).responseText,
+		fragmentShader: $.ajax(iFshader,{async:false}).responseText
+	});
+
 	modelMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
 		vertexShader: $.ajax(vshader, {async:false}).responseText,
@@ -97,16 +106,61 @@ function init(){
 	planeScreen = new THREE.Mesh( geometry, screenMaterial );
 	scene.add( planeScreen );	
 
-
 	//default colormap
 	setColorMap('heat');
+ 
 
-	//GUI controls
+	// Load the simulation
+	var loader = new THREE.ImageLoader();
+	loader.load(
+		// resource URL
+		'img/diffuse1.png',
+		// Function when resource is loaded
+		function ( image ) {			
+			runSimulation(image);
+		},
+		// Function called when download progresses
+		function ( xhr ) {
+			console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+		},
+		// Function called when download errors
+		function ( xhr ) {
+			console.log( 'An error happened' );
+		}
+	);
+
+}
+
+function runSimulation(initial_condition){
+
+	//create simulation buffers
+
+	resizeSimulation(512,512);
+
+	//add GUI controls
+
 	initControls();
 
-	//----run the simulation---
-	renderSimulation();
+	//set initial condition
 
+	initTextureBuffer = new THREE.Texture(initial_condition);
+    initTextureBuffer.wrapS = THREE.ClampToEdgeWrapping; // are these necessary?
+    initTextureBuffer.wrapT = THREE.ClampToEdgeWrapping;
+    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
+    initTextureBuffer.needsUpdate = true; //this IS necessary
+
+    //do the THING
+
+	planeScreen.material = initialMaterial;
+	mUniforms.tSource.value = initTextureBuffer;
+	renderer.render(scene, camera, mTextureBuffer1, true);
+	renderer.render(scene, camera, mTextureBuffer2, true);
+	mUniforms.tSource.value = mTextureBuffer1;
+	planeScreen.material = screenMaterial;
+	renderer.render(scene,camera);
+
+	//----proceed with the simulation---
+	renderSimulation();
 }
 
 function resizeSimulation(nx,ny){
@@ -127,10 +181,10 @@ function resizeSimulation(nx,ny){
 	                         format: THREE.RGBAFormat,
 	                         type: THREE.FloatType});
 
-	mTextureBuffer1.texture.wrapS  = THREE.RepeatWrapping;
-	mTextureBuffer1.texture.wrapT  = THREE.RepeatWrapping;
-	mTextureBuffer2.texture.wrapS  = THREE.RepeatWrapping;
-	mTextureBuffer2.texture.wrapT  = THREE.RepeatWrapping;
+	mTextureBuffer1.texture.wrapS  = THREE.ClampToEdgeWrapping;
+	mTextureBuffer1.texture.wrapT  = THREE.ClampToEdgeWrapping;
+	mTextureBuffer2.texture.wrapS  = THREE.ClampToEdgeWrapping;
+	mTextureBuffer2.texture.wrapT  = THREE.ClampToEdgeWrapping;
 	}
 	else{
 		if (!toggleBuffer){
@@ -141,12 +195,13 @@ function resizeSimulation(nx,ny){
 		}
 	
 	}
+
 }
 function renderSimulation(){	
 
 	planeScreen.material = modelMaterial;
 	for (var i=0; i<Math.floor(speed); i++){
-		if (toggleBuffer){
+		if (!toggleBuffer){
 			mUniforms.tSource.value = mTextureBuffer1;		
 			renderer.render(scene, camera, mTextureBuffer2, true);
 			mUniforms.tSource.value = mTextureBuffer2;		
@@ -247,13 +302,14 @@ function onTouchEnd(e) {
 }
 
 function diffuseControls(){
-	this.scene = "Blue Ink";
-	this.bc = "fixed";
+	this.scene = "heat";
+	this.bc = (mUniforms.boundaryCondition.value == 0) ? "fixed value" : "closed";
 	this.resolution = 1/mUniforms.delta.value.x;
 	this.brushWidth = mUniforms.brushWidth.value;
 	this.intensity = mUniforms.heatIntensity.value;
 	this.pause = function(){
-		 mUniforms.pause.value  = 1 - mUniforms.pause.value;
+		var pauseval = mUniforms.pause.value;
+		 mUniforms.pause.value  = 1 - pauseval;
 	}
 	this.speed = 1;
 	this.clearScreen = function(){
