@@ -68,7 +68,7 @@ function init(){
 		boundaryCondition: {type: "i", value:undefined},
 		heatSourceSign: {type: "f", value:1},
 		heatIntensity: {type: "f", value:0.4},
-		brushWidth: {type: "f", value:0.05},
+		brushWidth: {type: "f", value:0.5},
 		pause: {type: 'i', value:0}
 	};
 
@@ -241,9 +241,13 @@ function initControls() {
     sceneControl.onChange(setColorMap);
 
 
+    //folders
+    var folderSimulation = gui.addFolder('Simulation');
+    var folderExtSource = gui.addFolder('External Source');
+
     //boundary condition
 
-    bcControl = gui.add(controls, "bc", ["fixed value", "closed"]).name("Boundaries");
+    bcControl = folderSimulation.add(controls, "bc", ["fixed value", "closed"]).name("Boundaries");
     bcControl.onChange(function(value){
     	if (value=="fixed value"){
     		mUniforms.boundaryCondition.value = 0;
@@ -255,40 +259,45 @@ function initControls() {
 
     //mesh resolution
 
-	resolutionControl = gui.add(controls, "resolution", 16, 512).name('Resolution');
+	resolutionControl = folderSimulation.add(controls, "resolution", 16, 512).name('Resolution');
     resolutionControl.onChange(function(value){
     	resizeSimulation(value,value);
     	//resizeSimulation(value,value,1);
     });
 
 
+    //speed
+
+    speedControl = folderSimulation.add(controls, "speed", 1, 20).name('Speed');
+    speedControl.onChange(function(value){
+    	speed = Math.floor(value);
+    });  
+
+    //pause
+    pauseControl = folderSimulation.add(controls, "pause").name('Pause');
+
+    //clear screen control
+
+ 	clearControl = folderSimulation.add(controls, "clearScreen").name("Clear");
+
     //brush
 
-    brushWidthControl = gui.add(controls, "brushWidth", 0.01, 1).name('Brush Width');
+    brushWidthControl = folderExtSource.add(controls, "brushWidth", 0.01, 1).name('Brush Width');
     brushWidthControl.onChange(function(value){
     	mUniforms.brushWidth.value = value;
     });
 
     //heat/concentration source intensity
 
-    heatIntensityControl = gui.add(controls, "intensity", 0.01, 5).name('Intensity');
+    heatIntensityControl = folderExtSource.add(controls, "intensity", 0.01, 5).name('Intensity');
     heatIntensityControl.onChange(function(value){
     	mUniforms.heatIntensity.value = value;
     });
 
-    //speed
 
-    speedControl = gui.add(controls, "speed", 1, 20).name('Speed');
-    speedControl.onChange(function(value){
-    	speed = Math.floor(value);
-    });  
-
-    //pause
-    pauseControl = gui.add(controls, "pause").name('Pause');
-
-    //clear screen control
-
- 	clearControl = gui.add(controls, "clearScreen").name("Clear");
+    // folders are open initially
+    folderSimulation.open();
+    folderExtSource.open();
 
     //own separate container
 
