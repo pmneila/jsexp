@@ -12,7 +12,7 @@ var time=0;
 var speed = 1;
 
 var mTextureBuffer1, mTextureBuffer2;
-
+var screenMaterial, modelMaterial;
 
 //------------------------------------------------------
 //it requires variables: vshader, mFshader and sFshader
@@ -41,6 +41,7 @@ function init(){
 	container.onmousedown = onMouseDown;
 	container.onmouseup = onMouseUp;
 	container.onmousemove = onMouseMove;
+	container.onmouseout = onMouseOut;
 	container.oncontextmenu = function(){return false};
 	// container.o
 
@@ -68,7 +69,7 @@ function init(){
 		boundaryCondition: {type: "i", value:undefined},
 		heatSourceSign: {type: "f", value:1},
 		heatIntensity: {type: "f", value:0.4},
-		brushWidth: {type: "f", value:0.5},
+		brushWidth: {type: "f", value:0.1},
 		pause: {type: 'i', value:0}
 	};
 
@@ -101,8 +102,8 @@ function init(){
 	initControls();
 
 	//----run the simulation---
-	var toggleBuffer = false;
-	renderSimulation(0);
+	renderSimulation();
+
 }
 
 function resizeSimulation(nx,ny){
@@ -210,6 +211,10 @@ function onMouseUp(e){
 	mUniforms.mouseDown.value = 0;
 }
 
+function onMouseOut(e){
+	mouseDown = false;
+	mUniforms.mouseDown.value = 0;
+}
 
 function diffuseControls(){
 	this.scene = "Blue Ink";
