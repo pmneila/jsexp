@@ -42,6 +42,9 @@ function init(){
 	container.onmouseup = onMouseUp;
 	container.onmousemove = onMouseMove;
 	container.onmouseout = onMouseOut;
+    container.addEventListener("touchstart", onTouchStart, false);
+    container.addEventListener("touchmove", onTouchMove, false);
+    container.addEventListener("touchend", onTouchEnd, false);	
 	container.oncontextmenu = function(){return false};
 	// container.o
 
@@ -212,6 +215,33 @@ function onMouseUp(e){
 }
 
 function onMouseOut(e){
+	mouseDown = false;
+	mUniforms.mouseDown.value = 0;
+}
+
+function onTouchStart(e) {
+    var ev = e ? e : window.event;
+    e.preventDefault();
+    mousex = ev.targetTouches[0].pageX - simulation.offsetLeft;
+    mousey = ev.targetTouches[0].pageY - simulation.offsetTop;
+
+	mouseDown = true;
+	mUniforms.mouseDown.value = 1;
+	mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
+}
+
+function onTouchMove(e) {
+    var ev = e ? e : window.event;
+    e.preventDefault();
+    mousex = ev.targetTouches[0].pageX - simulation.offsetLeft;
+    mousey = ev.targetTouches[0].pageY - simulation.offsetTop;
+
+	if (mouseDown){
+		mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
+	}
+}
+
+function onTouchEnd(e) {
 	mouseDown = false;
 	mUniforms.mouseDown.value = 0;
 }
