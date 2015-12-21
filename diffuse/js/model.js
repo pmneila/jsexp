@@ -11,7 +11,7 @@ var info
 var time=0;
 var speed = 1;
 
-var mTextureBuffer1, mTextureBuffer2;
+var mTextureBuffer1, mTextureBuffer2, initTextureBuffer;
 var screenMaterial, modelMaterial;
 var imagen;
 
@@ -125,8 +125,7 @@ function init(){
 		'img/diffuse.png',
 		// Function when resource is loaded
 		function ( image ) {
-			// do something with it
-			mMap = new THREE.Texture(image);
+			initTextureBuffer = new THREE.Texture(image);
 			resizeSimulation(128,128);
 		},
 		// Function called when download progresses
@@ -177,16 +176,22 @@ function resizeSimulation(nx,ny){
 	}
 
 	if (initCondition){
+		//execute the first time
 
-		//GUI controls
+		//add GUI controls
 		initControls();
-		//mMap = new THREE.Texture(imagen);
-	    mMap.wrapS = THREE.RepeatWrapping;
-	    mMap.wrapT = THREE.RepeatWrapping;
-	    mMap.repeat.x = mMap.repeat.y = 512;
-	    mMap.needsUpdate = true;
 
-		mTextureBuffer2 = mMap;
+	    initTextureBuffer.wrapS = THREE.RepeatWrapping;
+	    initTextureBuffer.wrapT = THREE.RepeatWrapping;
+	    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
+	    initTextureBuffer.needsUpdate = true;
+
+		planeScreen.material = modelMaterial;
+		mUniforms.tSource.value = initTextureBuffer;
+		renderer.render(scene, camera, mTextureBuffer1, true);
+		mUniforms.tSource.value = mTextureBuffer1;
+		planeScreen.material = screenMaterial;
+		renderer.render(scene,camera);
 		initCondition = 0;
 
 		//render this texture to the screen	
@@ -199,7 +204,7 @@ function renderSimulation(){
 
 	planeScreen.material = modelMaterial;
 	for (var i=0; i<Math.floor(speed); i++){
-		if (toggleBuffer){
+		if (!toggleBuffer){
 			mUniforms.tSource.value = mTextureBuffer1;		
 			renderer.render(scene, camera, mTextureBuffer2, true);
 			mUniforms.tSource.value = mTextureBuffer2;		
