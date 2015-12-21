@@ -99,7 +99,7 @@ function init(){
 
 
 	//default colormap
-	setColorMap('blueInk');
+	setColorMap('heat');
 
 	//GUI controls
 	initControls();

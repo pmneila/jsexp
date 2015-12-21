@@ -19,9 +19,6 @@ void main()
 	float dt = 0.2*delta.x*delta.x;
 
 	if (pause==0){
-
-
-
 		//boundaries
 		if (boundaryCondition == 0){
 			if (vUv.x <=delta.x){
