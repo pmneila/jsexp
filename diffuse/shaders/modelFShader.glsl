@@ -18,7 +18,7 @@ void main()
 	float u_ijp = texture2D(tSource, vUv+vec2(0.0,delta.y)).r;
 	float dt = 0.2*delta.x*delta.x;
 
-	if (pause==0){
+	if (pause == 0){
 		//boundaries
 		if (boundaryCondition == 0){
 			if (vUv.x <=delta.x){

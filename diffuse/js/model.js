@@ -13,12 +13,18 @@ var speed = 1;
 
 var mTextureBuffer1, mTextureBuffer2;
 var screenMaterial, modelMaterial;
+var imagen;
+
+
+
+var mMap, initCondition = 1;
 
 //------------------------------------------------------
 //it requires variables: vshader, mFshader and sFshader
 //with url's of vertex/fragment shaders to work.
 //------------------------------------------------------
 function init(){
+	console.log('asdf');
 	width = Math.min(
 		window.innerWidth,
 		window.innerHeight)*0.95;
@@ -62,10 +68,9 @@ function init(){
 	scene = new THREE.Scene();
 
 	// plane
-
 	mUniforms = {
 		delta: {type:  "v2", value: undefined},
-		tSource: {type: "t", value: undefined},
+		tSource: {type: "t", value: mMap},
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
@@ -76,8 +81,6 @@ function init(){
 		pause: {type: 'i', value:0}
 	};
 
-	// create buffers
-	resizeSimulation(128,128);
 
 	// create material
 	modelMaterial = new THREE.ShaderMaterial({
@@ -97,15 +100,46 @@ function init(){
 	planeScreen = new THREE.Mesh( geometry, screenMaterial );
 	scene.add( planeScreen );	
 
-
 	//default colormap
 	setColorMap('heat');
 
-	//GUI controls
-	initControls();
 
-	//----run the simulation---
-	renderSimulation();
+
+	// create buffers
+	// resizeSimulation(128,128);
+
+	
+    // mMap = new THREE.Texture(lena);
+    // mMap = new THREE.ImageUtils.loadTexture("img/diffuse.png");
+	
+	// imagen = new Image();
+	// imagen.src = "img/diffuse.png";
+	// imagen.onload = function(){resizeSimulation(128,128)};	    
+
+	// instantiate a loader
+	var loader = new THREE.ImageLoader();
+
+	// load a image resource
+	loader.load(
+		// resource URL
+		'img/diffuse.png',
+		// Function when resource is loaded
+		function ( image ) {
+			// do something with it
+			mMap = new THREE.Texture(image);
+			resizeSimulation(128,128);
+		},
+		// Function called when download progresses
+		function ( xhr ) {
+			console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+		},
+		// Function called when download errors
+		function ( xhr ) {
+			console.log( 'An error happened' );
+		}
+	);
+
+
 
 }
 
@@ -127,10 +161,10 @@ function resizeSimulation(nx,ny){
 	                         format: THREE.RGBAFormat,
 	                         type: THREE.FloatType});
 
-	mTextureBuffer1.texture.wrapS  = THREE.RepeatWrapping;
-	mTextureBuffer1.texture.wrapT  = THREE.RepeatWrapping;
-	mTextureBuffer2.texture.wrapS  = THREE.RepeatWrapping;
-	mTextureBuffer2.texture.wrapT  = THREE.RepeatWrapping;
+	// mTextureBuffer1.texture.wrapS  = THREE.RepeatWrapping;
+	// mTextureBuffer1.texture.wrapT  = THREE.RepeatWrapping;
+	// mTextureBuffer2.texture.wrapS  = THREE.RepeatWrapping;
+	// mTextureBuffer2.texture.wrapT  = THREE.RepeatWrapping;
 	}
 	else{
 		if (!toggleBuffer){
@@ -140,6 +174,25 @@ function resizeSimulation(nx,ny){
 			mTextureBuffer2.setSize(nx,ny);	
 		}
 	
+	}
+
+	if (initCondition){
+
+		//GUI controls
+		initControls();
+		//mMap = new THREE.Texture(imagen);
+	    mMap.wrapS = THREE.RepeatWrapping;
+	    mMap.wrapT = THREE.RepeatWrapping;
+	    mMap.repeat.x = mMap.repeat.y = 512;
+	    mMap.needsUpdate = true;
+
+		mTextureBuffer2 = mMap;
+		initCondition = 0;
+
+		//render this texture to the screen	
+		//----run the simulation---
+		renderSimulation();	
+
 	}
 }
 function renderSimulation(){	
@@ -247,13 +300,14 @@ function onTouchEnd(e) {
 }
 
 function diffuseControls(){
-	this.scene = "Blue Ink";
+	this.scene = "heat";
 	this.bc = "fixed";
 	this.resolution = 1/mUniforms.delta.value.x;
 	this.brushWidth = mUniforms.brushWidth.value;
 	this.intensity = mUniforms.heatIntensity.value;
 	this.pause = function(){
-		 mUniforms.pause.value  = 1 - mUniforms.pause.value;
+		var pauseval = mUniforms.pause.value;
+		 mUniforms.pause.value  = 1 - pauseval;
 	}
 	this.speed = 1;
 	this.clearScreen = function(){
