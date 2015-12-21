@@ -114,7 +114,7 @@ function init(){
 	var loader = new THREE.ImageLoader();
 	loader.load(
 		// resource URL
-		'img/diffuse1.png',
+		'"https://rawgit.com/jgalazm/waterexp/master/diffuse/img/diffuse1.png',
 		// Function when resource is loaded
 		function ( image ) {			
 			runSimulation(image);
