@@ -135,7 +135,7 @@ function runSimulation(initial_condition){
 
 	//create simulation buffers
 
-	resizeSimulation(512,512);
+	resizeSimulation(128,128);
 
 	//add GUI controls
 
