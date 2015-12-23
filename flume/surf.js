@@ -18,7 +18,7 @@ var ylim = [];
 
 // Mouse.
 var mouseX, mouseY, mouseDown;
-var clickRadius = 30;
+var clickStyle = 'spline';
 
 function init() {
     //dom objects
@@ -40,7 +40,7 @@ function init() {
     ctx = canvas.getContext("2d");
 
     loadScene('dambreak');
-		initControls();
+	initControls();
     resizeCanvas();
 
 
@@ -81,7 +81,7 @@ function drawScale() {
 function flumeControls(){
       this.scene = "dambreak";
 			this.clickWidth = water.sigma*2.;
-			this.clickStyle = 'spline';
+			this.clickStyle = clickStyle;
 			this.restart = function(){
 				loadScene(currentScene);
 				if (paused)
@@ -113,7 +113,7 @@ function initControls(){
 			});
 
 			clickStyleControl.onChange(function(value){
-				water.clickStyle = value;
+				clickStyle = value;
 			});
 
       sceneControl.onChange(function(value){
@@ -179,7 +179,6 @@ function Water(surface, xmomentum, meshdata) {
     this.hold = false; //is any point held?
     this.held_index = -1; //which point is held, if any
     this.sigma = this.L / 10; //width of the mouse/touch interact in world units
-		this.clickStyle = 'spline';
 
     //display parameters
     this.radius = 3; //Math.log(mass);
@@ -269,7 +268,7 @@ function pulse() {
         if (water.x[i] >= xf) {
             break
         } else if (water.x[i] >= x0 && water.x[i] <= xf) {
-					if (water.clickStyle=='spline'){
+					if (clickStyle=='spline'){
 							if (water.x[i] < xmid) {
 									var t = (water.x[i] - x0) / (xmid - x0);
 									water.surface[i] = (2 * t * t * t - 3 * t * t + 1) * surf0;
@@ -281,11 +280,11 @@ function pulse() {
 							}
 							water.disp_surface[i] = world2canvas_y(water.surface[i]);
 					}
-					else if (water.clickStyle=='rect'){
+					else if (clickStyle=='rect'){
 							water.surface[i] = surfmid;
 							water.disp_surface[i] = world2canvas_y(water.surface[i]);
 					}
-					else if (water.clickStyle=='tri'){
+					else if (clickStyle=='tri'){
 							if (water.x[i] < xmid) {
 									var t = (water.x[i] - x0) / (xmid - x0);
 									water.surface[i] = (1-t)*surf0 + t*surfmid;

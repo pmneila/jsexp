@@ -9,26 +9,17 @@
             /*     overflow: hidden; */
         }
     </style>
-
+    <script type="text/javascript" src="dat.gui.min.js"></script>
+    <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
     <script type="text/javascript" src="surf.js"></script>
     <script type="text/javascript" src="surfsolve.js"></script>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-
     <meta charset="UTF-8">
-    <script>
-        $(function() {
-            init();
-        });
-    </script>
-
-		<script type="text/javascript" src="dat.gui.min.js"></script>
 </head>
 
-<body>
+<body onload="init()">
 
-		<div id="simulation">
+	<div id="simulation">
         <canvas id="myCanvas" width="100" height="200"></canvas>
     </div>
     <div id="controls"></div>
