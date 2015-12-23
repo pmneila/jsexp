@@ -83,8 +83,8 @@ function init(){
 		mouseDown: {type: "i", value: 0},
 		boundaryCondition: {type: "i", value:1},
 		heatSourceSign: {type: "f", value:1},
-		heatIntensity: {type: "f", value:0.4},
-		brushWidth: {type: "f", value:0.1},
+		heatIntensity: {type: "f", value:0.15},
+		brushWidth: {type: "f", value:0.23},
 		pause: {type: 'i', value:0}
 	};
 
@@ -142,7 +142,7 @@ function runSimulation(initial_condition){
 
 	//create simulation buffers
 
-	resizeSimulation(512,512);
+	resizeSimulation(128,128);
 
 	//add GUI controls
 
@@ -327,7 +327,7 @@ function diffuseControls(){
 		var pauseval = mUniforms.pause.value;
 		 mUniforms.pause.value  = 1 - pauseval;
 	}
-	this.speed = 1;
+	this.speed = speed;
 	this.clearScreen = function(){
 		var nx = Math.floor(1/mUniforms.delta.value.x);
 		var ny = Math.floor(1/mUniforms.delta.value.y);
@@ -423,3 +423,10 @@ function snapshot(){
 	var dataURL = container.toDataURL("image/png");
 	window.open(dataURL, "diffuse-"+Math.random());
 }	
+
+//defaults
+
+//res 256
+//speed 6.2
+//brush width 0.23
+//intensity 0.05
