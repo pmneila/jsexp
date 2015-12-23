@@ -1,7 +1,7 @@
 var container;
 var camera, scene, renderer;	
 
-var width, height;
+var width, height, ratio=1;
 var toggleBuffer = false;
 var planeScreen;
 
@@ -28,7 +28,7 @@ function init(){
 	width = Math.min(
 		window.innerWidth,
 		window.innerHeight)*0.95;
-	height = width;
+	height = width*ratio;
 	
 	// container
 	simulationDiv = document.getElementById('simulation');
@@ -143,7 +143,7 @@ function runSimulation(initial_condition){
 
 	//create simulation buffers
 
-	resizeSimulation(512,512);
+	resizeSimulation(512,512*ratio);
 
 	//add GUI controls
 
@@ -355,26 +355,6 @@ function initControls() {
     var folderSimulation = gui.addFolder('Simulation');
     var folderExtSource = gui.addFolder('External Source');
 
-    //boundary condition
-
-    bcControl = folderSimulation.add(controls, "bc", ["fixed value", "closed"]).name("Boundaries");
-    bcControl.onChange(function(value){
-    	if (value=="fixed value"){
-    		mUniforms.boundaryCondition.value = 0;
-    	}
-    	else if (value=="closed"){
-    		mUniforms.boundaryCondition.value = 1;
-    	}
-    })
-
-    //mesh resolution
-
-	resolutionControl = folderSimulation.add(controls, "resolution", 16, 512).name('Resolution');
-    resolutionControl.onChange(function(value){
-    	resizeSimulation(value,value*9/16);
-    	//resizeSimulation(value,value,1);
-    });
-
 
     //speed
 
@@ -393,6 +373,27 @@ function initControls() {
     //snapshot control
 
  	snapshotControl = folderSimulation.add(controls, "snapshot").name("Snapshot");
+
+    //boundary condition
+
+    bcControl = folderSimulation.add(controls, "bc", ["fixed value", "closed"]).name("Boundaries");
+    bcControl.onChange(function(value){
+    	if (value=="fixed value"){
+    		mUniforms.boundaryCondition.value = 0;
+    	}
+    	else if (value=="closed"){
+    		mUniforms.boundaryCondition.value = 1;
+    	}
+    })
+
+    //mesh resolution
+
+	resolutionControl = folderSimulation.add(controls, "resolution", 16, 512).name('Resolution');
+    resolutionControl.onChange(function(value){
+    	resizeSimulation(value,value*ratio);
+    	//resizeSimulation(value,value,1);
+    });
+
 
     //brush
 
