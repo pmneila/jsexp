@@ -48,11 +48,18 @@ function init(){
 	container.onmouseup = onMouseUp;
 	container.onmousemove = onMouseMove;
 	container.onmouseout = onMouseOut;
+	container.onkeypress = onKeyPress;
     container.addEventListener("touchstart", onTouchStart, false);
     container.addEventListener("touchmove", onTouchMove, false);
     container.addEventListener("touchend", onTouchEnd, false);	
 	container.oncontextmenu = function(){return false};
-	// container.o
+
+	  $(document).keyup(function(evt) {
+	    if (evt.keyCode == 80)
+	    	mUniforms.pause.value = 1 - mUniforms.pause.value;
+	    else if (evt.keyCode == 83)
+	    	snapshot();
+	  });
 
 
 	//renderer
@@ -301,6 +308,15 @@ function onTouchEnd(e) {
 	mUniforms.mouseDown.value = 0;
 }
 
+function onKeyPress(e){
+   if(e.keyCode == 8){
+       console.log('backspace');
+   }
+   if(e.keyCode == 32){
+       console.log('asdf');
+   }	
+}
+
 function diffuseControls(){
 	this.scene = "heat";
 	this.bc = (mUniforms.boundaryCondition.value == 0) ? "fixed value" : "closed";
@@ -319,10 +335,7 @@ function diffuseControls(){
 		resizeSimulation(nx,ny);
 	}
 
-	this.snapshot = function(){
-	    var dataURL = container.toDataURL("image/png");
-	    window.open(dataURL, "name-"+Math.random());
-	}	
+	this.snapshot = snapshot;
 }
 function initControls() {
     var controls = new diffuseControls;
@@ -370,7 +383,7 @@ function initControls() {
     });  
 
     //pause
-    pauseControl = folderSimulation.add(controls, "pause").name('Pause');
+    pauseControl = folderSimulation.add(controls, "pause").name('Start/Pause');
 
     //clear screen control
 
@@ -406,4 +419,7 @@ function initControls() {
     customContainer.appendChild(gui.domElement);
 }
 
-
+function snapshot(){
+	var dataURL = container.toDataURL("image/png");
+	window.open(dataURL, "diffuse-"+Math.random());
+}	
