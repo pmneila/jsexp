@@ -81,7 +81,7 @@ function init(){
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
-		boundaryCondition: {type: "i", value:1},
+		boundaryCondition: {type: "i", value:0},
 		heatSourceSign: {type: "f", value:1},
 		heatIntensity: {type: "f", value:0.15},
 		brushWidth: {type: "f", value:0.23},
@@ -239,7 +239,7 @@ function setColorMap(cmap){
 	}	
 	else if (cmap=='blueInk'){
 		colors = [new THREE.Vector4(1, 1, 1, 0),
-				new THREE.Vector4(0, 0, 1, 1.0),
+				new THREE.Vector4(0, 0, 1, 5.0),
 				new THREE.Vector4(0, 0, 1, 10.0),
 				new THREE.Vector4(0, 0, 1, 10.0),
 				new THREE.Vector4(0, 0, 1, 10.0),
