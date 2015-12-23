@@ -9,7 +9,7 @@ var mousex, mousey, mouseDown=false, rightClick=false;
 
 var info
 var time=0;
-var speed = 1;
+var speed = 5;
 
 var mTextureBuffer1, mTextureBuffer2, initTextureBuffer;
 var screenMaterial, modelMaterial, initialMaterial;
@@ -76,6 +76,7 @@ function init(){
 
 	// uniforms
 	mUniforms = {
+		texel: {type: "v2", value: new THREE.Vector2(1/width,1/height)},
 		delta: {type:  "v2", value: undefined},
 		tSource: {type: "t", value: mMap},
 		colors: {type: "v4v", value: undefined},
@@ -83,8 +84,8 @@ function init(){
 		mouseDown: {type: "i", value: 0},
 		boundaryCondition: {type: "i", value:0},
 		heatSourceSign: {type: "f", value:1},
-		heatIntensity: {type: "f", value:0.15},
-		brushWidth: {type: "f", value:0.23},
+		heatIntensity: {type: "f", value:500000},
+		brushWidth: {type: "f", value:110},
 		pause: {type: 'i', value:0}
 	};
 
@@ -142,7 +143,7 @@ function runSimulation(initial_condition){
 
 	//create simulation buffers
 
-	resizeSimulation(128,128);
+	resizeSimulation(512,512);
 
 	//add GUI controls
 
@@ -370,7 +371,7 @@ function initControls() {
 
 	resolutionControl = folderSimulation.add(controls, "resolution", 16, 512).name('Resolution');
     resolutionControl.onChange(function(value){
-    	resizeSimulation(value,value);
+    	resizeSimulation(value,value*9/16);
     	//resizeSimulation(value,value,1);
     });
 
@@ -395,14 +396,14 @@ function initControls() {
 
     //brush
 
-    brushWidthControl = folderExtSource.add(controls, "brushWidth", 0.01, 1).name('Brush Width');
+    brushWidthControl = folderExtSource.add(controls, "brushWidth", 8, 512).name('Brush Width');
     brushWidthControl.onChange(function(value){
     	mUniforms.brushWidth.value = value;
     });
 
     //heat/concentration source intensity
 
-    heatIntensityControl = folderExtSource.add(controls, "intensity", 0.01, 5).name('Intensity');
+    heatIntensityControl = folderExtSource.add(controls, "intensity", 1, 1000000).name('Intensity');
     heatIntensityControl.onChange(function(value){
     	mUniforms.heatIntensity.value = value;
     });
