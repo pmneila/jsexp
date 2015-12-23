@@ -318,6 +318,11 @@ function diffuseControls(){
 		mTextureBuffer1 = undefined;
 		resizeSimulation(nx,ny);
 	}
+
+	this.snapshot = function(){
+	    var dataURL = container.toDataURL("image/png");
+	    window.open(dataURL, "name-"+Math.random());
+	}	
 }
 function initControls() {
     var controls = new diffuseControls;
@@ -371,6 +376,10 @@ function initControls() {
 
  	clearControl = folderSimulation.add(controls, "clearScreen").name("Clear");
 
+    //snapshot control
+
+ 	snapshotControl = folderSimulation.add(controls, "snapshot").name("Snapshot");
+
     //brush
 
     brushWidthControl = folderExtSource.add(controls, "brushWidth", 0.01, 1).name('Brush Width');
@@ -387,6 +396,7 @@ function initControls() {
 
 
     // folders are open initially
+    
     folderSimulation.open();
     folderExtSource.open();
 
@@ -395,3 +405,5 @@ function initControls() {
     var customContainer = document.getElementById('controls');
     customContainer.appendChild(gui.domElement);
 }
+
+
