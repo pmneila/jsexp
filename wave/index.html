@@ -1,0 +1,34 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title> Diffuse (jgalazm) </title>		
+		<script src="js/three.min.js"></script>
+		<!--<script src="src/Three.js"></script>-->
+		<script src="js/jquery-1.11.3.min.js"></script>				
+		<script src="js/dat.gui.min.js"></script>				
+		<script src="js/model.js"></script>
+		<script>
+			var vshader = 'shaders/vshader.glsl';
+			var iFshader = 'shaders/initFShader.glsl';
+			var mFshader = 'shaders/modelFShader.glsl';
+			var sFshader = 'shaders/screenFShader.glsl';		
+			$(function(){
+				init();
+			});
+		</script>			
+	</head>		
+
+	<body>
+			
+		<div id="simulation" style='display:inline-block;'>
+			<canvas id="container" style="width:1024px;height:512px;border:1px solid #d0d0d0;" ></canvas>
+		</div>
+		<div id="controls" style='display:inline-block;'>
+		</div>	
+	</body>
+
+
+</html>
+
