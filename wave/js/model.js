@@ -9,9 +9,9 @@ var mousex, mousey, mouseDown=false, rightClick=false;
 
 var info
 var time=0;
-var speed = 5;
+var speed = 1;
 
-var mTextureBuffer1, mTextureBuffer2, initTextureBuffer;
+var mTextureBuffer1, mTextureBuffer2, mTextureBufferClone, initTextureBuffer;
 var screenMaterial, modelMaterial, initialMaterial;
 var imagen;
 
@@ -80,12 +80,13 @@ function init(){
 		delta: {type:  "v2", value: undefined},
 		tSource: {type: "t", value: mMap},
 		tSourcePrev: {type: "t", value: mMap},
+		firstIteration : {type: "i", value: 1},
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
 		boundaryCondition: {type: "i", value:0},
 		heatSourceSign: {type: "f", value:1},
-		heatIntensity: {type: "f", value:500000},
+		heatIntensity: {type: "f", value:5000},
 		brushWidth: {type: "f", value:110},
 		pause: {type: 'i', value:0}
 	};
@@ -103,6 +104,12 @@ function init(){
 		vertexShader: $.ajax(vshader, {async:false}).responseText,
 		fragmentShader: $.ajax(mFshader,{async:false}).responseText
 	});
+
+	cloneMaterial = new THREE.ShaderMaterial({
+		uniforms: mUniforms,
+		vertexShader: $.ajax(vshader, {async:false}).responseText,
+		fragmentShader: $.ajax(cloneFshader,{async:false}).responseText
+	});	
 
 	screenMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
@@ -144,7 +151,7 @@ function runSimulation(initial_condition){
 
 	//create simulation buffers
 
-	resizeSimulation(512,512*ratio);
+	resizeSimulation(128,128*ratio);
 
 	//add GUI controls
 
@@ -152,21 +159,22 @@ function runSimulation(initial_condition){
 
 	//set initial condition
 
-	// initTextureBuffer = new THREE.Texture(initial_condition);
- //    initTextureBuffer.wrapS = THREE.ClampToEdgeWrapping; // are these necessary?
- //    initTextureBuffer.wrapT = THREE.ClampToEdgeWrapping;
- //    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
- //    initTextureBuffer.needsUpdate = true; //this IS necessary
+	initTextureBuffer = new THREE.Texture(initial_condition);
+    initTextureBuffer.wrapS = THREE.ClampToEdgeWrapping; // are these necessary?
+    initTextureBuffer.wrapT = THREE.ClampToEdgeWrapping;
+    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
+    initTextureBuffer.needsUpdate = true; //this IS necessary
 
- //    //do the THING
 
-	// planeScreen.material = initialMaterial;
-	// mUniforms.tSource.value = initTextureBuffer;
-	// renderer.render(scene, camera, mTextureBuffer1, true);
-	// renderer.render(scene, camera, mTextureBuffer2, true);
-	// mUniforms.tSource.value = mTextureBuffer1;
-	// planeScreen.material = screenMaterial;
-	// renderer.render(scene,camera);
+    // do the THING
+
+	planeScreen.material = initialMaterial;
+	mUniforms.tSource.value = initTextureBuffer;
+	renderer.render(scene, camera, mTextureBuffer1, true);
+	renderer.render(scene, camera, mTextureBuffer2, true);
+	mUniforms.tSource.value = mTextureBuffer1;
+	planeScreen.material = screenMaterial;
+	renderer.render(scene,camera);
 
 	//----proceed with the simulation---
 	renderSimulation();
@@ -179,25 +187,35 @@ function resizeSimulation(nx,ny){
 	// create buffers
 	if (!mTextureBuffer1){
 
-	mTextureBuffer1 = new THREE.WebGLRenderTarget( nx, ny, 
-		 					{minFilter: THREE.LinearFilter,
-	                         magFilter: THREE.LinearFilter,
-	                         format: THREE.RGBAFormat,
-	                         type: THREE.FloatType});
-	mTextureBuffer2 = new THREE.WebGLRenderTarget( nx, ny, 
-		 					{minFilter: THREE.LinearFilter,
-	                         magFilter: THREE.LinearFilter,
-	                         format: THREE.RGBAFormat,
-	                         type: THREE.FloatType});
+		mTextureBuffer1 = new THREE.WebGLRenderTarget( nx, ny, 
+			 					{minFilter: THREE.LinearFilter,
+		                         magFilter: THREE.LinearFilter,
+		                         format: THREE.RGBAFormat,
+		                         type: THREE.FloatType});
+		mTextureBuffer2 = new THREE.WebGLRenderTarget( nx, ny, 
+			 					{minFilter: THREE.LinearFilter,
+		                         magFilter: THREE.LinearFilter,
+		                         format: THREE.RGBAFormat,
+		                         type: THREE.FloatType});
 
-	mTextureBuffer1.texture.wrapS  = THREE.ClampToEdgeWrapping;
-	mTextureBuffer1.texture.wrapT  = THREE.ClampToEdgeWrapping;
-	mTextureBuffer2.texture.wrapS  = THREE.ClampToEdgeWrapping;
-	mTextureBuffer2.texture.wrapT  = THREE.ClampToEdgeWrapping;
+		mTextureBufferClone = new THREE.WebGLRenderTarget( nx, ny, 
+			 					{minFilter: THREE.LinearFilter,
+		                         magFilter: THREE.LinearFilter,
+		                         format: THREE.RGBAFormat,
+		                         type: THREE.FloatType});		
+
+		mTextureBuffer1.texture.wrapS  = THREE.ClampToEdgeWrapping;
+		mTextureBuffer1.texture.wrapT  = THREE.ClampToEdgeWrapping;
+		mTextureBuffer2.texture.wrapS  = THREE.ClampToEdgeWrapping;
+		mTextureBuffer2.texture.wrapT  = THREE.ClampToEdgeWrapping;
+		mTextureBufferClone.texture.wrapT  = THREE.ClampToEdgeWrapping;
+		mTextureBufferClone.texture.wrapT  = THREE.ClampToEdgeWrapping;
 	}
 	else{
+		mTextureBufferClone.setSize(nx,ny);
 		if (!toggleBuffer){
 			mTextureBuffer1.setSize(nx,ny);
+
 		}	
 		else{
 			mTextureBuffer2.setSize(nx,ny);	
@@ -211,22 +229,38 @@ function renderSimulation(){
 	planeScreen.material = modelMaterial;
 	for (var i=0; i<Math.floor(speed); i++){
 		if (!toggleBuffer){
-			mUniforms.tSource.value = mTextureBuffer1;
-			mUniforms.tSourcePrev.value = mTextureBuffer2.clone();
+			planeScreen.material = cloneMaterial;
+			mUniforms.tSource.value = mTextureBuffer2;
+			renderer.render(scene, camera, mTextureBufferClone, true);
+			mUniforms.tSourcePrev.value = mTextureBufferClone;
+
+			planeScreen.material = modelMaterial;
+			mUniforms.tSource.value = mTextureBuffer1;			
 			renderer.render(scene, camera, mTextureBuffer2, true);
 			mUniforms.tSource.value = mTextureBuffer2;		
 		}
 		else{
-			mUniforms.tSource.value = mTextureBuffer2;
-			mUniforms.tSourcePrev.value = mTextureBuffer1.clone();
+			planeScreen.material = cloneMaterial;
+			mUniforms.tSource.value = mTextureBuffer1;
+			renderer.render(scene, camera, mTextureBufferClone, true);
+			mUniforms.tSourcePrev.value = mTextureBufferClone;
+
+			planeScreen.material = modelMaterial;
+			mUniforms.tSource.value = mTextureBuffer2;			
 			renderer.render(scene, camera, mTextureBuffer1, true);
 			mUniforms.tSource.value = mTextureBuffer1;
 		}
 
 		toggleBuffer = !toggleBuffer;
+		if (mUniforms.firstIteration.value==1){
+			mUniforms.firstIteration.value = 0;
+		}			
 	}
+
+
 	planeScreen.material = screenMaterial;
-	renderer.render(scene,camera);			
+	renderer.render(scene,camera);		
+
 	requestAnimationFrame(renderSimulation);
 }
 

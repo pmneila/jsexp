@@ -6,7 +6,9 @@ uniform vec4 colors[7];
 void main()
 {
 
-    float value = texture2D(tSource, vUv).r;
+	float x = (vUv.x-0.5)*2.0;
+	float y = (vUv.y-0.5)*2.0;
 
-    gl_FragColor = vec4((1.0-value)*colors[6].a, 0.0, 0.0, 1.0); 
+    float value = exp(-(x*x+y*y)/0.1);
+    gl_FragColor = vec4(value*0.0, 0.0, 0.0, 1.0); 
 }
