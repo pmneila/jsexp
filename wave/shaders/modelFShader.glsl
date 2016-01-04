@@ -26,9 +26,10 @@ void main()
 	if (mouseDown==1){
 		vec2 dist = (mouse-vUv)/texel;
 		if (length(dist)<=brushWidth/2.0){
-			u_ij += 0.001;
+			u_ij += heatSourceSign*heatIntensity*dt*dt;//10.0*exp(-length(dist)*length(dist));//
 		}
 	}		
+
 	if (pause == 0){
 		//boundaries
 		if (boundaryCondition == 0){

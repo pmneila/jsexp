@@ -9,7 +9,7 @@ var mousex, mousey, mouseDown=false, rightClick=false;
 
 var info
 var time=0;
-var speed = 1;
+var speed = 10;
 
 var mTextureBuffer1, mTextureBuffer2, mTextureBufferClone, initTextureBuffer;
 var screenMaterial, modelMaterial, initialMaterial;
@@ -86,9 +86,9 @@ function init(){
 		mouseDown: {type: "i", value: 0},
 		boundaryCondition: {type: "i", value:0},
 		heatSourceSign: {type: "f", value:1},
-		heatIntensity: {type: "f", value:5000},
+		heatIntensity: {type: "f", value:2000},
 		brushWidth: {type: "f", value:110},
-		pause: {type: 'i', value:0}
+		pause: {type: 'i', value:1}
 	};
 
 
@@ -159,11 +159,11 @@ function runSimulation(initial_condition){
 
 	//set initial condition
 
-	initTextureBuffer = new THREE.Texture(initial_condition);
-    initTextureBuffer.wrapS = THREE.ClampToEdgeWrapping; // are these necessary?
-    initTextureBuffer.wrapT = THREE.ClampToEdgeWrapping;
-    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
-    initTextureBuffer.needsUpdate = true; //this IS necessary
+	// initTextureBuffer = new THREE.Texture(initial_condition);
+ //    initTextureBuffer.wrapS = THREE.ClampToEdgeWrapping; // are these necessary?
+ //    initTextureBuffer.wrapT = THREE.ClampToEdgeWrapping;
+ //    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
+ //    initTextureBuffer.needsUpdate = true; //this IS necessary
 
 
     // do the THING
@@ -234,6 +234,7 @@ function renderSimulation(){
 			renderer.render(scene, camera, mTextureBufferClone, true);
 			mUniforms.tSourcePrev.value = mTextureBufferClone;
 
+			//mUniforms.tSourcePrev.value = mTextureBuffer2.clone();
 			planeScreen.material = modelMaterial;
 			mUniforms.tSource.value = mTextureBuffer1;			
 			renderer.render(scene, camera, mTextureBuffer2, true);
@@ -245,6 +246,7 @@ function renderSimulation(){
 			renderer.render(scene, camera, mTextureBufferClone, true);
 			mUniforms.tSourcePrev.value = mTextureBufferClone;
 
+			// mUniforms.tSourcePrev.value = mTextureBuffer1.clone();
 			planeScreen.material = modelMaterial;
 			mUniforms.tSource.value = mTextureBuffer2;			
 			renderer.render(scene, camera, mTextureBuffer1, true);
@@ -266,25 +268,108 @@ function renderSimulation(){
 
 function setColorMap(cmap){
 	var colors;
-	if (cmap=='heat'){
-		colors = [new THREE.Vector4(1, 1, 1, -10),
-				new THREE.Vector4(0, 1, 1, -6.6),
-				new THREE.Vector4(0, 0, 1, -3.3),
-				new THREE.Vector4(0, 0, 0, 0.0),
-				new THREE.Vector4(1, 0, 0, 3.3),
-				new THREE.Vector4(1, 1, 0, 6.6),	
-				new THREE.Vector4(1, 1, 1, 9.9)];
-	}	
-	else if (cmap=='blueInk'){
-		colors = [new THREE.Vector4(1, 1, 1, 0),
-				new THREE.Vector4(0, 0, 1, 5.0),
-				new THREE.Vector4(0, 0, 1, 10.0),
-				new THREE.Vector4(0, 0, 1, 10.0),
-				new THREE.Vector4(0, 0, 1, 10.0),
-				new THREE.Vector4(0, 0, 1, 10.0),	
-				new THREE.Vector4(0, 0, 1, 10.0),];
-	}
+	// if (cmap=='heat'){
+	// 	colors = [new THREE.Vector4(1, 1, 1, -10),
+	// 			new THREE.Vector4(0, 1, 1, -6.6),
+	// 			new THREE.Vector4(0, 0, 1, -3.3),
+	// 			new THREE.Vector4(0, 0, 0, 0.0),
+	// 			new THREE.Vector4(1, 0, 0, 3.3),
+	// 			new THREE.Vector4(1, 1, 0, 6.6),	
+	// 			new THREE.Vector4(1, 1, 1, 9.9),
+	// 			new THREE.Vector4(1, 1, 1, 9.9),
+	// 			new THREE.Vector4(1, 1, 1, 9.9),
+	// 			new THREE.Vector4(1, 1, 1, 9.9),
+	// 			new THREE.Vector4(1, 1, 1, 9.9),
+	// 			new THREE.Vector4(1, 1, 1, 9.9),
+	// 			new THREE.Vector4(1, 1, 1, 9.9),
+	// 			new THREE.Vector4(1, 1, 1, 9.9),
+	// 			new THREE.Vector4(1, 1, 1, 9.9),
+	// 			new THREE.Vector4(1, 1, 1, 9.9),];
+	// }	
+	colors = [new THREE.Vector4(0,90/255,185/255,-10.0),
+			  new THREE.Vector4(0,190/255,1,0.0),
+			  new THREE.Vector4(225/255,1,1,10.0)];
+	// colors = [new THREE.Vector4(0,0,1,-10.0),
+	// 		  new THREE.Vector4(0,1,1,-5.0),
+	// 		  new THREE.Vector4(0,1,0,-0.0),
+	// 		  new THREE.Vector4(1,1,0, 5.0),
+	// 		  new THREE.Vector4(1,0,0, 10.0)];
+	// else if (cmap=='blueInk'){
+	// 	colors = [new THREE.Vector4(1, 1, 1, 0),
+	// 			new THREE.Vector4(0, 0, 1, 5.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),	
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),
+	// 			new THREE.Vector4(0, 0, 1, 10.0),];
+	// }
+	// else if (cmap=="sadf"){
+	// 	var v = [0.06, 0.120, 0.130, 0.250, 0.260,
+	//   			0.380, 0.390, 0.500, 0.510, 0.620, 
+	//   			0.630, 0.740, 0.760, 0.870, 0.880, 
+	//   			1.000];
+	// 	var r = [4, 8, 24, 59, 39,
+	// 			113, 0, 0, 137, 254,
+	// 			131, 225, 159, 249, 255,
+	// 			255];
+	// 	var g = [29, 59, 77, 106, 32,
+	// 			184, 106, 208, 130, 229,
+	// 			80, 128, 19, 26, 255,
+	// 			64];
+	// 	var b = [59, 118, 157, 204, 228,
+	// 			249, 17, 0, 0, 20,
+	// 			0, 16, 0, 0, 255,
+	// 			196];
 
+
+	//   var colors = new Array(16);
+
+	//   for (var i=0; i<16; i++){
+	//   	colors[i] = new THREE.Vector4(
+	//   		r[i]/255, g[i]/255, b[i]/255, (v[i]*2.0-1.0)*10);
+	//   }
+	// }
+	// else if (cmap=="sadf2"){
+	// 	var v = [0.06, 0.120, 0.130, 0.250, 0.260,
+	//   			0.380, 0.390, 0.500, 0.510, 0.620, 
+	//   			0.630, 0.740, 0.760, 0.870, 0.880, 
+	//   			1.000];
+	// 	var r = [4, 8, 24, 59, 39,
+	// 			113, 0, 0, 137, 254,
+	// 			131, 225, 159, 249, 255,
+	// 			255];
+	// 	var g = [29, 59, 77, 106, 32,
+	// 			184, 106, 208, 130, 229,
+	// 			80, 128, 19, 26, 255,
+	// 			64];
+	// 	var b = [59, 118, 157, 204, 228,
+	// 			249, 17, 0, 0, 20,
+	// 			0, 16, 0, 0, 255,
+	// 			196];
+
+
+	//   var colors = new Array(16);
+
+	//   for (var i=0; i<16; i++){
+	//   	if (i<7){
+	//   	colors[i] = new THREE.Vector4(
+	//   		r[i]/255, g[i]/255, b[i]/255, (v[i]*2.0-1.0)*10);
+	//   	}
+	//   	else{
+	//   	colors[i] = new THREE.Vector4(
+	//   		r[5]/255, g[5]/255, b[5]/255, (v[i]*2.0-1.0)*10);	
+	//   	}
+	//   }
+	// }
 	mUniforms.colors.value = colors;
 }
 function onMouseMove(e){
@@ -384,7 +469,7 @@ function initControls() {
     // Scene (colormap)
 
     sceneControl = gui.add(controls, "scene",
-    	 ["blueInk", "heat"]).name("Scene");
+    	 ["blueInk", "heat","sadf","sadf2"]).name("Scene");
     sceneControl.onChange(setColorMap);
 
 
@@ -441,7 +526,7 @@ function initControls() {
 
     //heat/concentration source intensity
 
-    heatIntensityControl = folderExtSource.add(controls, "intensity", 1, 1000000).name('Intensity');
+    heatIntensityControl = folderExtSource.add(controls, "intensity", 1, 5000).name('Intensity');
     heatIntensityControl.onChange(function(value){
     	mUniforms.heatIntensity.value = value;
     });
