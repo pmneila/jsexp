@@ -9,7 +9,7 @@ var mousex, mousey, mouseDown=false, rightClick=false;
 
 var info
 var time=0;
-var speed = 5;
+var speed = 15;
 
 var mTextureBuffer1, mTextureBuffer2, initTextureBuffer;
 var screenMaterial, modelMaterial, initialMaterial;
@@ -84,7 +84,7 @@ function init(){
 		mouseDown: {type: "i", value: 0},
 		boundaryCondition: {type: "i", value:0},
 		heatSourceSign: {type: "f", value:1},
-		heatIntensity: {type: "f", value:500000},
+		heatIntensity: {type: "f", value:100000},
 		brushWidth: {type: "f", value:110},
 		pause: {type: 'i', value:0}
 	};
@@ -143,7 +143,7 @@ function runSimulation(initial_condition){
 
 	//create simulation buffers
 
-	resizeSimulation(512,512*ratio);
+	resizeSimulation(256,256*ratio);
 
 	//add GUI controls
 
@@ -344,35 +344,39 @@ function initControls() {
         autoPlace: false
     }); 
 
-    // Scene (colormap)
-
-    sceneControl = gui.add(controls, "scene",
-    	 ["blueInk", "heat"]).name("Scene");
-    sceneControl.onChange(setColorMap);
 
 
     //folders
+    
     var folderSimulation = gui.addFolder('Simulation');
+    var folderGeneral = gui.addFolder('General Controls');
     var folderExtSource = gui.addFolder('External Source');
 
 
     //speed
-
-    speedControl = folderSimulation.add(controls, "speed", 1, 20).name('Speed');
+    speedControl = folderGeneral.add(controls, "speed", 1, 20).name('Speed');
     speedControl.onChange(function(value){
     	speed = Math.floor(value);
     });  
-
+        
     //pause
-    pauseControl = folderSimulation.add(controls, "pause").name('Start/Pause');
+    pauseControl = folderGeneral.add(controls, "pause").name('Start/Pause');
 
     //clear screen control
 
- 	clearControl = folderSimulation.add(controls, "clearScreen").name("Clear");
+ 	clearControl = folderGeneral.add(controls, "clearScreen").name("Clear");
+
 
     //snapshot control
 
- 	snapshotControl = folderSimulation.add(controls, "snapshot").name("Snapshot");
+ 	snapshotControl = folderGeneral.add(controls, "snapshot").name("Snapshot");
+
+
+    // Scene (colormap)
+
+    sceneControl = folderSimulation.add(controls, "scene",
+    	 ["blueInk", "heat"]).name("Scene");
+    sceneControl.onChange(setColorMap);
 
     //boundary condition
 
@@ -397,14 +401,14 @@ function initControls() {
 
     //brush
 
-    brushWidthControl = folderExtSource.add(controls, "brushWidth", 8, 512).name('Brush Width');
+    brushWidthControl = folderExtSource.add(controls, "brushWidth", 8, 150).name('Brush Width');
     brushWidthControl.onChange(function(value){
     	mUniforms.brushWidth.value = value;
     });
 
     //heat/concentration source intensity
 
-    heatIntensityControl = folderExtSource.add(controls, "intensity", 1, 1000000).name('Intensity');
+    heatIntensityControl = folderExtSource.add(controls, "intensity", 1, 200000).name('Intensity');
     heatIntensityControl.onChange(function(value){
     	mUniforms.heatIntensity.value = value;
     });
@@ -412,6 +416,7 @@ function initControls() {
 
     // folders are open initially
     
+    folderGeneral.open();
     folderSimulation.open();
     folderExtSource.open();
 
