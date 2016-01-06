@@ -36,6 +36,11 @@ function init() {
     canvas.addEventListener("touchmove", onTouchMove, false);
     canvas.addEventListener("touchend", onTouchEnd, false);
 
+
+    $(document).keyup(function(evt) {
+        if (evt.keyCode == 83)
+            snapshot();
+    });
     //set the canvas context
     ctx = canvas.getContext("2d");
 
@@ -79,52 +84,60 @@ function drawScale() {
 }
 
 function flumeControls(){
-      this.scene = "dambreak";
-			this.clickWidth = water.sigma*2.;
-			this.clickStyle = clickStyle;
-			this.restart = function(){
-				loadScene(currentScene);
-				if (paused)
-					water.drawCurrent();
+    this.scene = "dambreak";
+    this.clickWidth = water.sigma*2.;
+    this.clickStyle = clickStyle;
+    this.restart = function(){
+    	loadScene(currentScene);
+    	if (paused)
+    		water.drawCurrent();
 
-			};
-			this.pause = function(){ paused = !paused};
+    };
+    this.pause = function(){ paused = !paused};
+    this.snapshot = snapshot;            
 }
 
 function initControls(){
-			var text = new flumeControls();
-			var gui = new dat.GUI({autoPlace:false});//
+    var text = new flumeControls();
+    var gui = new dat.GUI({autoPlace:false});//
 
-      sceneControl = gui.add(text, "scene", ["dambreak", "rest"] ).name('Scene');
+    sceneControl = gui.add(text, "scene", ["dambreak", "rest"] ).name('Scene');
 
-			var folderTime = gui.addFolder('Time');
-			folderTime.add(text, 'restart').name('Restart');
-			folderTime.add(text, 'pause').name('Pause/Continue');
+    //snapshot control
+
+    snapshotControl = gui.add(text, "snapshot").name("Snapshot");
+
+    var folderTime = gui.addFolder('Time');
+    folderTime.add(text, 'restart').name('Restart');
+    folderTime.add(text, 'pause').name('Pause/Continue');
 
 
-			var folderTouchMouse = gui.addFolder('Touch/Mouse');
-			clickWidthControl = folderTouchMouse.add(
-				text, 'clickWidth', 0.1,10).name('Width');
-			clickStyleControl = folderTouchMouse.add(
-				text, 'clickStyle',['spline','rect','tri']).name('Style');
+    var folderTouchMouse = gui.addFolder('Touch/Mouse');
+    clickWidthControl = folderTouchMouse.add(
+    	text, 'clickWidth', 0.1,10).name('Width');
+    clickStyleControl = folderTouchMouse.add(
+    	text, 'clickStyle',['spline','rect','tri']).name('Style');
 
-			clickWidthControl.onChange(function(value){
-				water.sigma = value/2.
-			});
+    clickWidthControl.onChange(function(value){
+    	water.sigma = value/2.
+    });
 
-			clickStyleControl.onChange(function(value){
-				clickStyle = value;
-			});
+    clickStyleControl.onChange(function(value){
+    	clickStyle = value;
+    });
 
-      sceneControl.onChange(function(value){
-        loadScene(value);
-        if (paused){
-          water.drawCurrent();
-        }
-      });
+    sceneControl.onChange(function(value){
+    loadScene(value);
+    if (paused){
+    water.drawCurrent();
+    }
+    });
 
 			var customContainer = document.getElementById('controls');
 			 customContainer.appendChild(gui.domElement);
+
+    folderTime.open();
+    folderTouchMouse.open();
 }
 
 function loadScene(scene) {
@@ -134,11 +147,11 @@ function loadScene(scene) {
     var cfl = 0.45;
     var surface = new Array(npoints);
     var xmomentum = new Array(npoints);
-    ylim = [0, 11];
+    ylim = [0, L*9/16];
 
     if (scene=="dambreak"){
       for (var i = 0; i < npoints; i++) {
-          surface[i] = (i < npoints / 2) ? 10 : 3;
+          surface[i] = (i < npoints / 3) ? ylim[1]*0.95 : ylim[1]/3;
           xmomentum[i] = 0;
       }
     }
@@ -399,3 +412,8 @@ function releaseFVCell() {
         water.setHold(false);
     }
 }
+
+function snapshot(){
+    var dataURL = canvas.toDataURL("image/png");
+    window.open(dataURL, "diffuse-"+Math.random());
+}   
