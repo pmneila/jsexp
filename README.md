@@ -15,7 +15,7 @@ Diffuse heat or ink in a homogeneous media. It uses the simplest possible numeri
 
 A one dimensional implementation of a Finite Volume, Roe-type Riemann solver of the Shallow Water Equations without topography variations.
 
-[![Flume preview](flume/snapshots/snap1.png)](https://jgalazm.github.io/flume.html)
+[![Flume preview](flume/snapshots/snap2.png)](https://jgalazm.github.io/flume.html)
 
 
 
