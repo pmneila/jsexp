@@ -1,5 +1,5 @@
 var container;
-var calc_camera	, view_camera, scene, renderer;	
+var camera, scene, renderer;	
 
 var width, height, ratio=1;
 var toggleBuffer = false;
@@ -15,7 +15,6 @@ var mTextureBuffer1, mTextureBuffer2, mTextureBufferClone, initTextureBuffer;
 var screenMaterial, modelMaterial, initialMaterial;
 var imagen;
 
-var track_controls;
 
 
 var mMap, initCondition = 1;
@@ -45,15 +44,15 @@ function init(){
 	simulationDiv.appendChild( info );	
 
 	//event handlers
-	// container.onmousedown = onMouseDown;
-	// container.onmouseup = onMouseUp;
-	// container.onmousemove = onMouseMove;
-	// container.onmouseout = onMouseOut;
-	// container.onkeypress = onKeyPress;
- //    container.addEventListener("touchstart", onTouchStart, false);
- //    container.addEventListener("touchmove", onTouchMove, false);
- //    container.addEventListener("touchend", onTouchEnd, false);	
-	// container.oncontextmenu = function(){return false};
+	container.onmousedown = onMouseDown;
+	container.onmouseup = onMouseUp;
+	container.onmousemove = onMouseMove;
+	container.onmouseout = onMouseOut;
+	container.onkeypress = onKeyPress;
+    container.addEventListener("touchstart", onTouchStart, false);
+    container.addEventListener("touchmove", onTouchMove, false);
+    container.addEventListener("touchend", onTouchEnd, false);	
+	container.oncontextmenu = function(){return false};
 
 	  $(document).keyup(function(evt) {
 	    if (evt.keyCode == 80)
@@ -65,33 +64,15 @@ function init(){
 
 	//renderer
 	renderer = new THREE.WebGLRenderer({canvas:container, preserveDrawingBuffer: true});
-	renderer.setClearColor( 0x555555 );
+	renderer.setClearColor( 0xffffff );
 	renderer.setSize(width, height);
 
 	// camera
 	var camHeight = height;
 	var camWidth = width;
 
+	camera = new THREE.OrthographicCamera( -0.5*2, 0.5*2, 0.5*2, -0.5*2, - 500, 1000 );
 	scene = new THREE.Scene();
-	calc_camera = new THREE.OrthographicCamera( -1.0, 1.0, 1.0, -1.0, - 500, 1000 );
-	view_camera = new THREE.OrthographicCamera( -1.0, 1.0, 1.0, -1.0, 0,1000 );
-
-
-	view_camera.position.x = 1.0;
-	view_camera.position.y = 0.5;
-	view_camera.position.z = 1.0;
-	view_camera.lookAt(new THREE.Vector3(0,0,0));
-
-	scene.add(calc_camera);
-	scene.add(view_camera);
-
-	track_controls = new THREE.OrbitControls( view_camera, renderer.domElement );
-	track_controls.enableDamping = true;
-	track_controls.dampingFactor = 0.25;
-
-
-	// var axisHelper = new THREE.AxisHelper( 1 );
-	// scene.add( axisHelper );
 
 	// uniforms
 	mUniforms = {
@@ -103,7 +84,7 @@ function init(){
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
-		boundaryCondition: {type: "i", value:1},
+		boundaryCondition: {type: "i", value:0},
 		heatSourceSign: {type: "f", value:1},
 		heatIntensity: {type: "f", value:2000},
 		brushWidth: {type: "f", value:110},
@@ -132,39 +113,40 @@ function init(){
 
 	screenMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
-		vertexShader: $.ajax(deformVShader,{async:false}).responseText,
-		fragmentShader: $.ajax(sFshader,{async:false}).responseText,
-		side: THREE.DoubleSide
+		vertexShader: $.ajax(vshader,{async:false}).responseText,
+		fragmentShader: $.ajax(sFshader,{async:false}).responseText
 	});
 
 	//create plane geometry
-	var geometry = new THREE.PlaneGeometry(2.0 , 2.0, 128,128*ratio);
+	var geometry = new THREE.PlaneGeometry(1.0 , 1.0);
 	planeScreen = new THREE.Mesh( geometry, screenMaterial );
-
 	scene.add( planeScreen );	
 
 	//default colormap
 	setColorMap('heat');
+
+	var axisHelper = new THREE.AxisHelper( 5 );
+	scene.add( axisHelper );	
  
 
 	// Load the simulation
-	var loader = new THREE.ImageLoader();
-	loader.load(
-		// resource URL
-		"img/diffuse1.png",
-		// Function when resource is loaded
-		function ( image ) {			
-			runSimulation(image);
-		},
-		// Function called when download progresses
-		function ( xhr ) {
-			console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-		},
-		// Function called when download errors
-		function ( xhr ) {
-			console.log( 'An error happened' );
-		}
-	);
+	// var loader = new THREE.ImageLoader();
+	// loader.load(
+	// 	// resource URL
+	// 	"img/diffuse1.png",
+	// 	// Function when resource is loaded
+	// 	function ( image ) {			
+	// 		runSimulation(image);
+	// 	},
+	// 	// Function called when download progresses
+	// 	function ( xhr ) {
+	// 		console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+	// 	},
+	// 	// Function called when download errors
+	// 	function ( xhr ) {
+	// 		console.log( 'An error happened' );
+	// 	}
+	// );
 
 }
 
@@ -191,18 +173,13 @@ function runSimulation(initial_condition){
 
 	planeScreen.material = initialMaterial;
 	mUniforms.tSource.value = initTextureBuffer;
-	renderer.render(scene, calc_camera, mTextureBuffer1, true);
-	renderer.render(scene, calc_camera, mTextureBuffer2, true);
+	renderer.render(scene, camera, mTextureBuffer1, true);
+	renderer.render(scene, camera, mTextureBuffer2, true);
 	mUniforms.tSource.value = mTextureBuffer1;
 	planeScreen.material = screenMaterial;
-	renderer.render(scene,calc_camera);
+	renderer.render(scene,camera);
 
 	//----proceed with the simulation---
-	planeScreen.rotateX(-3.14/2);
-	planeScreen.rotateZ(-3.14/2);
-	calc_camera.rotateX(-3.14/2);
-	calc_camera.rotateZ(-3.14/2);
-	// calc_camera.rotateX(-3.14/2);
 	renderSimulation();
 }
 
@@ -257,25 +234,25 @@ function renderSimulation(){
 		if (!toggleBuffer){
 			planeScreen.material = cloneMaterial;
 			mUniforms.tSource.value = mTextureBuffer2;
-			renderer.render(scene, calc_camera, mTextureBufferClone, true);
+			renderer.render(scene, camera, mTextureBufferClone, true);
 			mUniforms.tSourcePrev.value = mTextureBufferClone;
 
 			//mUniforms.tSourcePrev.value = mTextureBuffer2.clone();
 			planeScreen.material = modelMaterial;
 			mUniforms.tSource.value = mTextureBuffer1;			
-			renderer.render(scene, calc_camera, mTextureBuffer2, true);
+			renderer.render(scene, camera, mTextureBuffer2, true);
 			mUniforms.tSource.value = mTextureBuffer2;		
 		}
 		else{
 			planeScreen.material = cloneMaterial;
 			mUniforms.tSource.value = mTextureBuffer1;
-			renderer.render(scene, calc_camera, mTextureBufferClone, true);
+			renderer.render(scene, camera, mTextureBufferClone, true);
 			mUniforms.tSourcePrev.value = mTextureBufferClone;
 
 			// mUniforms.tSourcePrev.value = mTextureBuffer1.clone();
 			planeScreen.material = modelMaterial;
 			mUniforms.tSource.value = mTextureBuffer2;			
-			renderer.render(scene, calc_camera, mTextureBuffer1, true);
+			renderer.render(scene, camera, mTextureBuffer1, true);
 			mUniforms.tSource.value = mTextureBuffer1;
 		}
 
@@ -287,10 +264,8 @@ function renderSimulation(){
 
 
 	planeScreen.material = screenMaterial;
-	track_controls.update();	
-	renderer.render(scene,view_camera);		
+	renderer.render(scene,camera);		
 
-	
 	requestAnimationFrame(renderSimulation);
 }
 

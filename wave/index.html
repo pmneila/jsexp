@@ -3,18 +3,21 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title> Diffuse (jgalazm) </title>		
+		<title> Wave (jgalazm) </title>		
 		<script src="js/three.min.js"></script>
 		<!--<script src="src/Three.js"></script>-->
-		<script src="js/jquery-1.11.3.min.js"></script>				
+		<script src="js/jquery-1.11.3.min.js"></script>			
+		<script src="js/TrackBallControls.js"></script>	
+		<script src="js/orbitcontrols.js"></script>
 		<script src="js/dat.gui.min.js"></script>				
 		<script src="js/model.js"></script>
 		<script>
 			var vshader = 'shaders/vshader.glsl';
+			var deformVShader = 'shaders/deformVShader.glsl';
 			var iFshader = 'shaders/initFShader.glsl';
 			var mFshader = 'shaders/modelFShader.glsl';
 			var sFshader = 'shaders/screenFShader.glsl';		
-			var cloneFshader = 'shaders/cloneFShader.glsl';		
+			var cloneFshader = 'shaders/cloneFShader.glsl';	
 			$(function(){
 				init();
 			});

@@ -9,6 +9,11 @@ void main()
 	float x = (vUv.x-0.5)*2.0;
 	float y = (vUv.y-0.5)*2.0;
 
-    float value = 20.0*exp(-(x*x+y*y)/0.1);
+    float value = 0.2*exp(-(x*x+y*y)/0.05);
+    // value = 0.0;
+    // if (length(vUv-vec2(0.5,0.5))<0.05 ){
+    // 	value = 0.2;
+    // }
+    
     gl_FragColor = vec4(value, 0.0, 0.0, 1.0); 
 }
