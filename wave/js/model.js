@@ -3,7 +3,8 @@ var calc_camera	, view_camera, scene, renderer;
 
 var width, height, ratio=1;
 var toggleBuffer = false;
-var planeScreen;
+var planeScreen, planewidth=2.0, planeheight=2.0;
+var simWidth = 128*2, simHeight=128*2;
 
 var mousex, mousey, mouseDown=false, rightClick=false;
 
@@ -20,6 +21,8 @@ var track_controls;
 
 var mMap, initCondition = 1;
 
+var mouse;
+var objects = [];
 //------------------------------------------------------
 //it requires variables: vshader, mFshader and sFshader
 //with url's of vertex/fragment shaders to work.
@@ -53,6 +56,8 @@ function init(){
  //    container.addEventListener("touchstart", onTouchStart, false);
  //    container.addEventListener("touchmove", onTouchMove, false);
  //    container.addEventListener("touchend", onTouchEnd, false);	
+	document.addEventListener( 'mousedown', onDocumentMouseDown, false ); 
+	document.addEventListener( 'mouseup', onDocumentMouseUp, false ); 
 	// container.oncontextmenu = function(){return false};
 
 	  $(document).keyup(function(evt) {
@@ -62,6 +67,8 @@ function init(){
 	    	snapshot();
 	  });
 
+	raycaster = new THREE.Raycaster();
+	mouse = new THREE.Vector2();
 
 	//renderer
 	renderer = new THREE.WebGLRenderer({canvas:container, preserveDrawingBuffer: true});
@@ -74,7 +81,7 @@ function init(){
 
 	scene = new THREE.Scene();
 	calc_camera = new THREE.OrthographicCamera( -1.0, 1.0, 1.0, -1.0, - 500, 1000 );
-	view_camera = new THREE.OrthographicCamera( -1.0, 1.0, 1.0, -1.0, 0,1000 );
+	view_camera = new THREE.OrthographicCamera( -1.0, 1.0, 1.0, -1.0, 0, 1000 );
 
 
 	view_camera.position.x = 1.0;
@@ -138,9 +145,10 @@ function init(){
 	});
 
 	//create plane geometry
-	var geometry = new THREE.PlaneGeometry(2.0 , 2.0, 128,128*ratio);
+	var geometry = new THREE.PlaneGeometry(planewidth , planeheight, 128,128*ratio);
 	planeScreen = new THREE.Mesh( geometry, screenMaterial );
 
+	objects.push(planeScreen);
 	scene.add( planeScreen );	
 
 	//default colormap
@@ -172,7 +180,7 @@ function runSimulation(initial_condition){
 
 	//create simulation buffers
 
-	resizeSimulation(128,128*ratio);
+	resizeSimulation(simWidth,simHeight);
 
 	//add GUI controls
 
@@ -208,7 +216,7 @@ function runSimulation(initial_condition){
 
 function resizeSimulation(nx,ny){
 
-	mUniforms.delta.value = new THREE.Vector2(1/nx,1/ny);
+	mUniforms.delta.value = new THREE.Vector2(planewidth/nx,planeheight/ny);
 	
 	// create buffers
 	if (!mTextureBuffer1){
@@ -252,6 +260,9 @@ function resizeSimulation(nx,ny){
 }
 function renderSimulation(){	
 
+	if (mUniforms.mouseDown.value == 1){
+		console.log('asdf');
+	}
 	planeScreen.material = modelMaterial;
 	for (var i=0; i<Math.floor(speed); i++){
 		if (!toggleBuffer){
@@ -286,177 +297,23 @@ function renderSimulation(){
 	}
 
 
+
 	planeScreen.material = screenMaterial;
 	track_controls.update();	
 	renderer.render(scene,view_camera);		
 
 	
 	requestAnimationFrame(renderSimulation);
+
 }
 
 function setColorMap(cmap){
 	var colors;
-	// if (cmap=='heat'){
-	// 	colors = [new THREE.Vector4(1, 1, 1, -10),
-	// 			new THREE.Vector4(0, 1, 1, -6.6),
-	// 			new THREE.Vector4(0, 0, 1, -3.3),
-	// 			new THREE.Vector4(0, 0, 0, 0.0),
-	// 			new THREE.Vector4(1, 0, 0, 3.3),
-	// 			new THREE.Vector4(1, 1, 0, 6.6),	
-	// 			new THREE.Vector4(1, 1, 1, 9.9),
-	// 			new THREE.Vector4(1, 1, 1, 9.9),
-	// 			new THREE.Vector4(1, 1, 1, 9.9),
-	// 			new THREE.Vector4(1, 1, 1, 9.9),
-	// 			new THREE.Vector4(1, 1, 1, 9.9),
-	// 			new THREE.Vector4(1, 1, 1, 9.9),
-	// 			new THREE.Vector4(1, 1, 1, 9.9),
-	// 			new THREE.Vector4(1, 1, 1, 9.9),
-	// 			new THREE.Vector4(1, 1, 1, 9.9),
-	// 			new THREE.Vector4(1, 1, 1, 9.9),];
-	// }	
 	colors = [new THREE.Vector4(0,90/255,185/255,-10.0),
 			  new THREE.Vector4(0,190/255,1,0.0),
 			  new THREE.Vector4(225/255,1,1,10.0)];
-	// colors = [new THREE.Vector4(0,0,1,-10.0),
-	// 		  new THREE.Vector4(0,1,1,-5.0),
-	// 		  new THREE.Vector4(0,1,0,-0.0),
-	// 		  new THREE.Vector4(1,1,0, 5.0),
-	// 		  new THREE.Vector4(1,0,0, 10.0)];
-	// else if (cmap=='blueInk'){
-	// 	colors = [new THREE.Vector4(1, 1, 1, 0),
-	// 			new THREE.Vector4(0, 0, 1, 5.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),	
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),
-	// 			new THREE.Vector4(0, 0, 1, 10.0),];
-	// }
-	// else if (cmap=="sadf"){
-	// 	var v = [0.06, 0.120, 0.130, 0.250, 0.260,
-	//   			0.380, 0.390, 0.500, 0.510, 0.620, 
-	//   			0.630, 0.740, 0.760, 0.870, 0.880, 
-	//   			1.000];
-	// 	var r = [4, 8, 24, 59, 39,
-	// 			113, 0, 0, 137, 254,
-	// 			131, 225, 159, 249, 255,
-	// 			255];
-	// 	var g = [29, 59, 77, 106, 32,
-	// 			184, 106, 208, 130, 229,
-	// 			80, 128, 19, 26, 255,
-	// 			64];
-	// 	var b = [59, 118, 157, 204, 228,
-	// 			249, 17, 0, 0, 20,
-	// 			0, 16, 0, 0, 255,
-	// 			196];
 
-
-	//   var colors = new Array(16);
-
-	//   for (var i=0; i<16; i++){
-	//   	colors[i] = new THREE.Vector4(
-	//   		r[i]/255, g[i]/255, b[i]/255, (v[i]*2.0-1.0)*10);
-	//   }
-	// }
-	// else if (cmap=="sadf2"){
-	// 	var v = [0.06, 0.120, 0.130, 0.250, 0.260,
-	//   			0.380, 0.390, 0.500, 0.510, 0.620, 
-	//   			0.630, 0.740, 0.760, 0.870, 0.880, 
-	//   			1.000];
-	// 	var r = [4, 8, 24, 59, 39,
-	// 			113, 0, 0, 137, 254,
-	// 			131, 225, 159, 249, 255,
-	// 			255];
-	// 	var g = [29, 59, 77, 106, 32,
-	// 			184, 106, 208, 130, 229,
-	// 			80, 128, 19, 26, 255,
-	// 			64];
-	// 	var b = [59, 118, 157, 204, 228,
-	// 			249, 17, 0, 0, 20,
-	// 			0, 16, 0, 0, 255,
-	// 			196];
-
-
-	//   var colors = new Array(16);
-
-	//   for (var i=0; i<16; i++){
-	//   	if (i<7){
-	//   	colors[i] = new THREE.Vector4(
-	//   		r[i]/255, g[i]/255, b[i]/255, (v[i]*2.0-1.0)*10);
-	//   	}
-	//   	else{
-	//   	colors[i] = new THREE.Vector4(
-	//   		r[5]/255, g[5]/255, b[5]/255, (v[i]*2.0-1.0)*10);	
-	//   	}
-	//   }
-	// }
 	mUniforms.colors.value = colors;
-}
-function onMouseMove(e){
-	var ev = e ? e : window.event;
-
-	mousex = ev.pageX - simulation.offsetLeft;
-	mousey = ev.pageY - simulation.offsetTop;
-
-	if (mouseDown){
-		mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
-	}
-}
-function onMouseDown(e){
-	mouseDown = true;
-	mUniforms.mouseDown.value = 1;
-	if (e.which == 3){
-		mUniforms.heatSourceSign.value = -1;
-	}
-	else {
-		mUniforms.heatSourceSign.value =  1;
-	}
-	mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
-}
-
-function onMouseUp(e){
-	mouseDown = false;
-	mUniforms.mouseDown.value = 0;
-}
-
-function onMouseOut(e){
-	mouseDown = false;
-	mUniforms.mouseDown.value = 0;
-}
-
-function onTouchStart(e) {
-    var ev = e ? e : window.event;
-    e.preventDefault();
-    mousex = ev.targetTouches[0].pageX - simulation.offsetLeft;
-    mousey = ev.targetTouches[0].pageY - simulation.offsetTop;
-
-	mouseDown = true;
-	mUniforms.mouseDown.value = 1;
-	mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
-}
-
-function onTouchMove(e) {
-    var ev = e ? e : window.event;
-    e.preventDefault();
-    mousex = ev.targetTouches[0].pageX - simulation.offsetLeft;
-    mousey = ev.targetTouches[0].pageY - simulation.offsetTop;
-
-	if (mouseDown){
-		mUniforms.mouse.value = new THREE.Vector2(mousex/width,1-mousey/height);
-	}
-}
-
-function onTouchEnd(e) {
-	mouseDown = false;
-	mUniforms.mouseDown.value = 0;
 }
 
 function onKeyPress(e){
@@ -480,8 +337,8 @@ function diffuseControls(){
 	}
 	this.speed = speed;
 	this.clearScreen = function(){
-		var nx = Math.floor(1/mUniforms.delta.value.x);
-		var ny = Math.floor(1/mUniforms.delta.value.y);
+		var nx = Math.floor(planewidth/mUniforms.delta.value.x);
+		var ny = Math.floor(planeheight/mUniforms.delta.value.y);
 		mTextureBuffer1 = undefined;
 		resizeSimulation(nx,ny);
 	}
@@ -576,9 +433,32 @@ function snapshot(){
 	window.open(dataURL, "diffuse-"+Math.random());
 }	
 
-//defaults
 
-//res 256
-//speed 6.2
-//brush width 0.23
-//intensity 0.05
+function onDocumentMouseDown( event ) {
+
+	event.preventDefault();
+	mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+
+	raycaster.setFromCamera( mouse, view_camera );
+
+	var intersects = raycaster.intersectObjects( objects );
+
+	if ( intersects.length > 0 ) {
+		
+		var point = intersects[0].point;
+		var u = (point.z+planewidth/2.0)/planewidth;
+		var v = (point.x+planeheight/2.0)/planeheight;
+		var UV = new THREE.Vector2(u,v);
+		console.log(UV);
+		mUniforms.mouse.value = UV;
+		mUniforms.mouseDown.value= 1;
+		// mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
+		// mouseDown: {type: "i", value: 0},
+	}
+
+}
+
+function onDocumentMouseUp(event){
+	mUniforms.mouseDown.value = 0;
+}
