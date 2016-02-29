@@ -23,14 +23,7 @@ void main()
 	float u_ijp = texture2D(tSource, vUv+vec2(0.0,delta.y)).r;
 	float dt = 0.125*delta.x;
 
-	// if (mouseDown==1){
-		// vec2 dist = (mouse-vUv)/texel;
-	// 	if (length(dist)<=brushWidth/2.0){
-	// 		u_ij = 0.1;//heatIntensity*dt*dt;//10.0*exp(-length(dist)*length(dist));//
-	// 	}
-	// 	gl_FragColor = vec4(u_ij,0.0,0.0,1.0);
-	// 	return;
-	// }		
+		
 
 	if (pause == 0){
 		//boundaries
@@ -87,10 +80,11 @@ void main()
 			u_np += dt*dt/(delta.y*delta.y)*(u_ijm+u_ijp-2.0*u_ij);
 
 			if (mouseDown==1){
-				vec2 dist = (mouse-vUv)/texel;
+				vec2 dist = (mouse-vUv);
 				float l = length(dist);
-				if (l<=brushWidth/2.0){
-					u_np = 0.1*exp(-length(dist)*length(dist)/(brushWidth/4.0)/(brushWidth/4.0));
+				if (l<=brushWidth){
+				u_np = exp(-l*l/(brushWidth/2.0*brushWidth/2.0));
+				u_np = u_np*heatIntensity/10000.0;
 				}
 			}
 			gl_FragColor = vec4(u_np,0.0,0.0,1.0);
@@ -98,6 +92,14 @@ void main()
 		}
 	}
 	else{
+		if (mouseDown==1){
+			vec2 dist = (mouse-vUv);
+			float l = length(dist);
+			if (l<=brushWidth){
+				u_ij = exp(-l*l/(brushWidth/2.0*brushWidth/2.0));
+				u_ij = u_ij*heatIntensity/10000.0;
+			}
+		}		
 
 		gl_FragColor = vec4(u_ij,0.0,0.0,1.0);
 	}

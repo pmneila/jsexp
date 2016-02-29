@@ -3,17 +3,14 @@ uniform sampler2D tSource;
 uniform sampler2D tSourcePrev;
 uniform vec2 delta;
 uniform vec4 colors[7];
+uniform vec2 texel;
 void main()
 {
 
-	float x = (vUv.x-0.5)*2.0;
-	float y = (vUv.y-0.5)*2.0;
+	vec2 dist = (vUv-vec2(0.5,0.5));
+	float l = length(dist);
 
-    float value = 0.2*exp(-(x*x+y*y)/0.05);
-    // value = 0.0;
-    // if (length(vUv-vec2(0.5,0.5))<0.05 ){
-    // 	value = 0.2;
-    // }
-    
+    float value = 0.1*exp(-l*l/0.05/0.05);
     gl_FragColor = vec4(value, 0.0, 0.0, 1.0); 
+
 }

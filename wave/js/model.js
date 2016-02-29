@@ -1,124 +1,134 @@
+//scene
 var container;
-var calc_camera	, view_camera, scene, renderer;	
+var screenWidth, screenHeight, ratio=1;
+var scene, calc_camera, view_camera, renderer, track_controls;	
 
-var width, height, ratio=1;
+//simulation object
+var cube;
+var planeScreen, planewidth=1.0, planeheight=1.0, objects=[];
+var simNx = 128, simNy=128;
+
+//simulation texture
 var toggleBuffer = false;
-var planeScreen, planewidth=2.0, planeheight=2.0;
-var simWidth = 128*2, simHeight=128*2;
-
-var mousex, mousey, mouseDown=false, rightClick=false;
-
-var info
-var time=0;
-var speed = 10;
-
 var mTextureBuffer1, mTextureBuffer2, mTextureBufferClone, initTextureBuffer;
 var screenMaterial, modelMaterial, initialMaterial;
-var imagen;
 
-var track_controls;
+//interactivity
+var speed = 1;
+var mouse, mouseDown=false, rightClick=false;
 
 
-var mMap, initCondition = 1;
+function init()	{
+	screenWidth = window.innerWidth;
+	screenHeight = window.innerHeight*0.99;
 
-var mouse;
-var objects = [];
-//------------------------------------------------------
-//it requires variables: vshader, mFshader and sFshader
-//with url's of vertex/fragment shaders to work.
-//------------------------------------------------------
-function init(){
-	console.log('asdf');
-	width = Math.min(
-		window.innerWidth,
-		window.innerHeight)*0.95;
-	height = width*ratio;
-	
-	// container
 	simulationDiv = document.getElementById('simulation');
 	container = document.getElementById( 'container' );
-	container.width = width;
-	container.height = height;
-
-	info = document.createElement( 'div' );
-	info.style.position = 'absolute';
-	info.style.top = '10px';
-	info.style.width = '100%';
-	info.style.textAlign = 'center';
-	simulationDiv.appendChild( info );	
-
-	//event handlers
-	// container.onmousedown = onMouseDown;
-	// container.onmouseup = onMouseUp;
-	// container.onmousemove = onMouseMove;
-	// container.onmouseout = onMouseOut;
-	// container.onkeypress = onKeyPress;
- //    container.addEventListener("touchstart", onTouchStart, false);
- //    container.addEventListener("touchmove", onTouchMove, false);
- //    container.addEventListener("touchend", onTouchEnd, false);	
-	document.addEventListener( 'mousedown', onDocumentMouseDown, false ); 
-	document.addEventListener( 'mouseup', onDocumentMouseUp, false ); 
-	// container.oncontextmenu = function(){return false};
-
-	  $(document).keyup(function(evt) {
-	    if (evt.keyCode == 80)
-	    	mUniforms.pause.value = 1 - mUniforms.pause.value;
-	    else if (evt.keyCode == 83)
-	    	snapshot();
-	  });
+	container.width = screenWidth;
+	container.height = screenHeight;
 
 	raycaster = new THREE.Raycaster();
 	mouse = new THREE.Vector2();
 
 	//renderer
 	renderer = new THREE.WebGLRenderer({canvas:container, preserveDrawingBuffer: true});
-	renderer.setClearColor( 0x555555 );
-	renderer.setSize(width, height);
+	renderer.setClearColor(0xcccccc);
+	renderer.setSize(screenWidth, screenHeight);
 
-	// camera
-	var camHeight = height;
-	var camWidth = width;
-
+	//scene
 	scene = new THREE.Scene();
-	calc_camera = new THREE.OrthographicCamera( -1.0, 1.0, 1.0, -1.0, - 500, 1000 );
-	view_camera = new THREE.OrthographicCamera( -1.0, 1.0, 1.0, -1.0, 0, 1000 );
-
-
-	view_camera.position.x = 1.0;
-	view_camera.position.y = 0.5;
-	view_camera.position.z = 1.0;
-	view_camera.lookAt(new THREE.Vector3(0,0,0));
-
+	// Create light
+	var light = new THREE.PointLight(0xffffff, 1.0);
+	// We want it to be very close to our character
+	light.position.set(1.0,1.0,1.0);
+	scene.add(light);
+	// cameras
+	calc_camera = new THREE.OrthographicCamera( planewidth/-2,
+												planeheight/2,
+												planeheight/2,
+												planeheight/-2,
+												- 500, 1000 );
+	calc_camera.rotateX(-3.14/2);
+	calc_camera.rotateZ(-3.14/2);
 	scene.add(calc_camera);
+
+	var L = 0.6;
+	view_camera = new THREE.PerspectiveCamera(60, screenWidth/screenHeight, 0.01, 5000);
+	view_camera.position.x = 0.5*1.5000;
+	view_camera.position.y = 0.75*1.5;
+	view_camera.position.z = 0.5*1.5;
+	view_camera.lookAt(new THREE.Vector3(0,0,0));	
 	scene.add(view_camera);
 
-	track_controls = new THREE.OrbitControls( view_camera, renderer.domElement );
-	track_controls.enableDamping = true;
-	track_controls.dampingFactor = 0.25;
+	track_controls = new THREE.TrackballControls(view_camera);
+	track_controls.target.set(0,0,0);
+	track_controls.zoomSpeed = 0.1;
+	track_controls.rotateSpeed = 2.0;
+	// ADD OBJECTS
 
 
-	// var axisHelper = new THREE.AxisHelper( 1 );
+	// mUniforms = THREE.UniformsUtils.merge([
+	// 		mUniforms,THREE.UniformsLib['lights']]);
+
+	createMaterials();
+
+	createGeometries();
+
+
+ 	//event handlers
+	document.addEventListener( 'mousedown', onDocumentMouseDown, false ); 
+	document.addEventListener( 'mouseup', onDocumentMouseUp, false ); 
+	$(document).keyup(function(evt) {
+	if (evt.keyCode == 80)
+		mUniforms.pause.value = 1 - mUniforms.pause.value;
+	else if (evt.keyCode == 83)
+		snapshot();
+	});
+
+
+	// var axisHelper = new THREE.AxisHelper( 1.5 );
 	// scene.add( axisHelper );
+	// Load the simulation
+	runSimulation();
+	// var loader = new THREE.ImageLoader();
+	// loader.load(
+	// 	// resource URL
+	// 	"img/diffuse1.png",
+	// 	// Function when resource is loaded
+	// 	function ( image ) {			
+	// 		runSimulation(image);
+	// 	},
+	// 	// Function called when download progresses
+	// 	function ( xhr ) {
+	// 		console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+	// 	},
+	// 	// Function called when download errors
+	// 	function ( xhr ) {
+	// 		console.log( 'An error happened' );
+	// 	}
+	// );
 
-	// uniforms
+}
+
+function createMaterials(){
 	mUniforms = {
-		texel: {type: "v2", value: new THREE.Vector2(1/width,1/height)},
+		texel: {type: "v2", value: undefined},
 		delta: {type:  "v2", value: undefined},
-		tSource: {type: "t", value: mMap},
-		tSourcePrev: {type: "t", value: mMap},
+		tSource: {type: "t", value: undefined},
+		tSourcePrev: {type: "t", value: undefined},
 		firstIteration : {type: "i", value: 1},
 		colors: {type: "v4v", value: undefined},
 		mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
 		mouseDown: {type: "i", value: 0},
-		boundaryCondition: {type: "i", value:1},
+		boundaryCondition: {type: "i", value:0},
 		heatSourceSign: {type: "f", value:1},
-		heatIntensity: {type: "f", value:2000},
-		brushWidth: {type: "f", value:110},
-		pause: {type: 'i', value:1}
+		heatIntensity: {type: "f", value:600},
+		brushWidth: {type: "f", value:0.1},
+		pause: {type: 'i', value:1},
+		lightPos: {type: "v3", value:new THREE.Vector3(1.0,1.0,1.0)}
 	};
-
-
-	// create material
+	
+	// create shader materials
 	initialMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
 		vertexShader: $.ajax(vshader, {async:false}).responseText,
@@ -141,46 +151,52 @@ function init(){
 		uniforms: mUniforms,
 		vertexShader: $.ajax(deformVShader,{async:false}).responseText,
 		fragmentShader: $.ajax(sFshader,{async:false}).responseText,
-		side: THREE.DoubleSide
+		side: THREE.DoubleSide,
+		transparent:true,
+		fog:true
 	});
 
-	//create plane geometry
-	var geometry = new THREE.PlaneGeometry(planewidth , planeheight, 128,128*ratio);
-	planeScreen = new THREE.Mesh( geometry, screenMaterial );
-
-	objects.push(planeScreen);
-	scene.add( planeScreen );	
-
-	//default colormap
-	setColorMap('heat');
- 
-
-	// Load the simulation
-	var loader = new THREE.ImageLoader();
-	loader.load(
-		// resource URL
-		"img/diffuse1.png",
-		// Function when resource is loaded
-		function ( image ) {			
-			runSimulation(image);
-		},
-		// Function called when download progresses
-		function ( xhr ) {
-			console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-		},
-		// Function called when download errors
-		function ( xhr ) {
-			console.log( 'An error happened' );
-		}
-	);
-
+	screen2Material = new THREE.MeshPhongMaterial( { color: 0xdddddd, 
+					specular: 0x009900, shininess: 30} );
 }
+function createGeometries(){
+	//create plane geometry
+	var geometry = new THREE.PlaneGeometry(planewidth , planeheight, 32*2,32*2);
+	planeScreen = new THREE.Mesh( geometry, screenMaterial );
+	planeScreen.rotateX(-3.14/2);
+	planeScreen.rotateZ(-3.14/2);
+	objects.push(planeScreen);
+	scene.add( planeScreen );
 
-function runSimulation(initial_condition){
+	var box_geometry = new THREE.BoxGeometry( planewidth, planeheight, 0.1 );
+	var boxWallsMaterial = new THREE.MeshPhongMaterial( 
+			{color: 0x00a0a0, 
+			specular: 0xffffff, 
+			shininess: 30, 
+			opacity:0.5,
+			transparent:true} );
+	var boxTopMaterial = new THREE.MeshBasicMaterial( {color:0x000000, visible:false} );
+	var mats = [];
+	mats.push(boxWallsMaterial);
+	mats.push(boxWallsMaterial);
+	mats.push(boxWallsMaterial);
+	mats.push(boxWallsMaterial);
+	mats.push(boxTopMaterial);
+	mats.push(boxWallsMaterial);
+    var faceMaterial = new THREE.MeshFaceMaterial(mats);
+
+	var box_material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+	cube = new THREE.Mesh( box_geometry, faceMaterial );
+	cube.rotateX(-3.14/2);
+	cube.rotateZ(-3.14/2);
+	cube.position.y = -0.05;
+	scene.add( cube );
+}
+function runSimulation(){
 
 	//create simulation buffers
 
-	resizeSimulation(simWidth,simHeight);
+	resizeSimulation(simNx,simNy);
 
 	//add GUI controls
 
@@ -189,13 +205,13 @@ function runSimulation(initial_condition){
 	//set initial condition
 
 	// initTextureBuffer = new THREE.Texture(initial_condition);
- //    initTextureBuffer.wrapS = THREE.ClampToEdgeWrapping; // are these necessary?
- //    initTextureBuffer.wrapT = THREE.ClampToEdgeWrapping;
- //    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
- //    initTextureBuffer.needsUpdate = true; //this IS necessary
+	// initTextureBuffer.wrapS = THREE.ClampToEdgeWrapping; // are these necessary?
+	// initTextureBuffer.wrapT = THREE.ClampToEdgeWrapping;
+	// initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
+	// initTextureBuffer.needsUpdate = true; //this IS necessary
 
 
-    // do the THING
+    // render init to buffers
 
 	planeScreen.material = initialMaterial;
 	mUniforms.tSource.value = initTextureBuffer;
@@ -205,19 +221,61 @@ function runSimulation(initial_condition){
 	planeScreen.material = screenMaterial;
 	renderer.render(scene,calc_camera);
 
-	//----proceed with the simulation---
-	planeScreen.rotateX(-3.14/2);
-	planeScreen.rotateZ(-3.14/2);
-	calc_camera.rotateX(-3.14/2);
-	calc_camera.rotateZ(-3.14/2);
-	// calc_camera.rotateX(-3.14/2);
+
+	
+	//finally render
 	renderSimulation();
+}
+
+function renderSimulation(){	
+
+	planeScreen.material = modelMaterial;
+	for (var i=0; i<Math.floor(speed); i++){
+		if (!toggleBuffer){
+			planeScreen.material = cloneMaterial;
+			mUniforms.tSource.value = mTextureBuffer2;
+			renderer.render(scene, calc_camera, mTextureBufferClone, true);
+			mUniforms.tSourcePrev.value = mTextureBufferClone;
+
+			//mUniforms.tSourcePrev.value = mTextureBuffer2.clone();
+			planeScreen.material = modelMaterial;
+			mUniforms.tSource.value = mTextureBuffer1;			
+			renderer.render(scene, calc_camera, mTextureBuffer2, true);	
+		}
+		else{
+			planeScreen.material = cloneMaterial;
+			mUniforms.tSource.value = mTextureBuffer1;
+			renderer.render(scene, calc_camera, mTextureBufferClone, true);
+			mUniforms.tSourcePrev.value = mTextureBufferClone;
+
+			// mUniforms.tSourcePrev.value = mTextureBuffer1.clone();
+			planeScreen.material = modelMaterial;
+			mUniforms.tSource.value = mTextureBuffer2;			
+			renderer.render(scene, calc_camera, mTextureBuffer1, true);
+			
+		}
+
+		toggleBuffer = !toggleBuffer;
+		if (mUniforms.firstIteration.value==1){
+			mUniforms.firstIteration.value = 0;
+		}			
+		
+	}
+
+	// mUniforms.mouseDown.value = 0;
+
+
+	planeScreen.material = screenMaterial;
+	track_controls.update();	
+	renderer.render(scene,view_camera);	
+	requestAnimationFrame(renderSimulation);
+
 }
 
 function resizeSimulation(nx,ny){
 
 	mUniforms.delta.value = new THREE.Vector2(planewidth/nx,planeheight/ny);
-	
+	mUniforms.texel.value = new THREE.Vector2(1/nx,1/ny);
 	// create buffers
 	if (!mTextureBuffer1){
 
@@ -258,63 +316,7 @@ function resizeSimulation(nx,ny){
 	}
 
 }
-function renderSimulation(){	
 
-	if (mUniforms.mouseDown.value == 1){
-		console.log('asdf');
-	}
-	planeScreen.material = modelMaterial;
-	for (var i=0; i<Math.floor(speed); i++){
-		if (!toggleBuffer){
-			planeScreen.material = cloneMaterial;
-			mUniforms.tSource.value = mTextureBuffer2;
-			renderer.render(scene, calc_camera, mTextureBufferClone, true);
-			mUniforms.tSourcePrev.value = mTextureBufferClone;
-
-			//mUniforms.tSourcePrev.value = mTextureBuffer2.clone();
-			planeScreen.material = modelMaterial;
-			mUniforms.tSource.value = mTextureBuffer1;			
-			renderer.render(scene, calc_camera, mTextureBuffer2, true);
-			mUniforms.tSource.value = mTextureBuffer2;		
-		}
-		else{
-			planeScreen.material = cloneMaterial;
-			mUniforms.tSource.value = mTextureBuffer1;
-			renderer.render(scene, calc_camera, mTextureBufferClone, true);
-			mUniforms.tSourcePrev.value = mTextureBufferClone;
-
-			// mUniforms.tSourcePrev.value = mTextureBuffer1.clone();
-			planeScreen.material = modelMaterial;
-			mUniforms.tSource.value = mTextureBuffer2;			
-			renderer.render(scene, calc_camera, mTextureBuffer1, true);
-			mUniforms.tSource.value = mTextureBuffer1;
-		}
-
-		toggleBuffer = !toggleBuffer;
-		if (mUniforms.firstIteration.value==1){
-			mUniforms.firstIteration.value = 0;
-		}			
-	}
-
-
-
-	planeScreen.material = screenMaterial;
-	track_controls.update();	
-	renderer.render(scene,view_camera);		
-
-	
-	requestAnimationFrame(renderSimulation);
-
-}
-
-function setColorMap(cmap){
-	var colors;
-	colors = [new THREE.Vector4(0,90/255,185/255,-10.0),
-			  new THREE.Vector4(0,190/255,1,0.0),
-			  new THREE.Vector4(225/255,1,1,10.0)];
-
-	mUniforms.colors.value = colors;
-}
 
 function onKeyPress(e){
    if(e.keyCode == 8){
@@ -324,13 +326,12 @@ function onKeyPress(e){
        console.log('asdf');
    }	
 }
-
+ 
 function diffuseControls(){
 	this.scene = "heat";
 	this.bc = (mUniforms.boundaryCondition.value == 0) ? "fixed value" : "closed";
-	this.resolution = 1/mUniforms.delta.value.x;
-	this.brushWidth = mUniforms.brushWidth.value;
-	this.intensity = mUniforms.heatIntensity.value;
+	this.brushWidth = mUniforms.brushWidth.value*100;
+	this.height = mUniforms.heatIntensity.value;
 	this.pause = function(){
 		var pauseval = mUniforms.pause.value;
 		 mUniforms.pause.value  = 1 - pauseval;
@@ -340,23 +341,20 @@ function diffuseControls(){
 		var nx = Math.floor(planewidth/mUniforms.delta.value.x);
 		var ny = Math.floor(planeheight/mUniforms.delta.value.y);
 		mTextureBuffer1 = undefined;
-		resizeSimulation(nx,ny);
+		simNx = nx;
+		simNy = ny;
+		resizeSimulation(simNx, simNy);
 	}
 
 	this.snapshot = snapshot;
+
+	this.lightpolar = Math.PI/4;
 }
 function initControls() {
     var controls = new diffuseControls;
     var gui = new dat.GUI({
         autoPlace: false
     }); 
-
-    // Scene (colormap)
-
-    sceneControl = gui.add(controls, "scene",
-    	 ["blueInk", "heat","sadf","sadf2"]).name("Scene");
-    sceneControl.onChange(setColorMap);
-
 
     //folders
     var folderSimulation = gui.addFolder('Simulation');
@@ -365,7 +363,7 @@ function initControls() {
 
     //speed
 
-    speedControl = folderSimulation.add(controls, "speed", 1, 20).name('Speed');
+    speedControl = folderSimulation.add(controls, "speed", 1, 20).name('Speed').step(1);
     speedControl.onChange(function(value){
     	speed = Math.floor(value);
     });  
@@ -393,30 +391,27 @@ function initControls() {
     	}
     })
 
-    //mesh resolution
-
-	resolutionControl = folderSimulation.add(controls, "resolution", 16, 512).name('Resolution');
-    resolutionControl.onChange(function(value){
-    	resizeSimulation(value,value*ratio);
-    	//resizeSimulation(value,value,1);
-    });
 
 
     //brush
 
-    brushWidthControl = folderExtSource.add(controls, "brushWidth", 8, 512).name('Brush Width');
+    brushWidthControl = folderExtSource.add(controls, "brushWidth", 1, 30).name('Brush Width');
     brushWidthControl.onChange(function(value){
-    	mUniforms.brushWidth.value = value;
+    	mUniforms.brushWidth.value = value/100;
     });
 
     //heat/concentration source intensity
 
-    heatIntensityControl = folderExtSource.add(controls, "intensity", 1, 5000).name('Intensity');
-    heatIntensityControl.onChange(function(value){
+    heightControl = folderExtSource.add(controls, "height", 1, 5000).name('Height');
+    heightControl.onChange(function(value){
     	mUniforms.heatIntensity.value = value;
     });
 
 
+    lightAngleControl = folderExtSource.add(controls, "lightpolar", 0, Math.PI*2);
+    lightAngleControl.onChange(function(value){
+    	mUniforms.lightPos.value = new THREE.Vector3(Math.cos(value), Math.sin(value),1.0);
+    })
     // folders are open initially
     
     folderSimulation.open();
@@ -447,14 +442,11 @@ function onDocumentMouseDown( event ) {
 	if ( intersects.length > 0 ) {
 		
 		var point = intersects[0].point;
-		var u = (point.z+planewidth/2.0)/planewidth;
-		var v = (point.x+planeheight/2.0)/planeheight;
+		var u = (point.z+planewidth/2.0)/planewidth;//in [0,1]
+		var v = (point.x+planeheight/2.0)/planeheight;//in [0,1]
 		var UV = new THREE.Vector2(u,v);
-		console.log(UV);
 		mUniforms.mouse.value = UV;
 		mUniforms.mouseDown.value= 1;
-		// mouse: {type: "v2", value: new THREE.Vector2(0.5,0.5)},
-		// mouseDown: {type: "i", value: 0},
 	}
 
 }

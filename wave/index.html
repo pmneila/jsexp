@@ -21,7 +21,22 @@
 			$(function(){
 				init();
 			});
-		</script>			
+		</script>		
+
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+			html, body {
+		    margin: 0;
+		    height: 100%;
+			}
+			#controls{
+				position: absolute;
+				top: 0px;
+			}
+		</style>
 	</head>		
 
 	<body>
@@ -29,7 +44,7 @@
 		<div id="simulation" style='display:inline-block;'>
 			<canvas id="container" style="width:1024px;height:512px;border:1px solid #d0d0d0;" ></canvas>
 		</div>
-		<div id="controls" style='display:inline-block;'>
+		<div id="controls">
 		</div>	
 	</body>
 
