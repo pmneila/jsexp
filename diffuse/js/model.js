@@ -160,10 +160,10 @@ function runSimulation(initial_condition){
 
     //do the THING
 
-	planeScreen.material = initialMaterial;
-	mUniforms.tSource.value = initTextureBuffer;
-	renderer.render(scene, camera, mTextureBuffer1, true);
-	renderer.render(scene, camera, mTextureBuffer2, true);
+	// planeScreen.material = initialMaterial;
+	// mUniforms.tSource.value = initTextureBuffer;
+	// renderer.render(scene, camera, mTextureBuffer1, true);
+	// renderer.render(scene, camera, mTextureBuffer2, true);
 	mUniforms.tSource.value = mTextureBuffer1;
 	planeScreen.material = screenMaterial;
 	renderer.render(scene,camera);
