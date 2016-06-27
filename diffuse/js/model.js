@@ -93,20 +93,28 @@ function init(){
 	// create material
 	initialMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
-		vertexShader: $.ajax(vshader, {async:false}).responseText,
-		fragmentShader: $.ajax(iFshader,{async:false}).responseText
+		// vertexShader: $.ajax(vshader, {async:false}).responseText,
+		// fragmentShader: $.ajax(iFshader,{async:false}).responseText
+		vertexShader: document.getElementById('vshader').textContent,
+		fragmentShader: document.getElementById('iFshader').textContent,
 	});
 
 	modelMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
-		vertexShader: $.ajax(vshader, {async:false}).responseText,
-		fragmentShader: $.ajax(mFshader,{async:false}).responseText
+		// vertexShader: $.ajax(vshader, {async:false}).responseText,
+		// fragmentShader: $.ajax(mFshader,{async:false}).responseText
+		vertexShader: document.getElementById('vshader').textContent,
+		fragmentShader: document.getElementById('mFshader').textContent,
+
 	});
 
 	screenMaterial = new THREE.ShaderMaterial({
 		uniforms: mUniforms,
-		vertexShader: $.ajax(vshader,{async:false}).responseText,
-		fragmentShader: $.ajax(sFshader,{async:false}).responseText
+		// vertexShader: $.ajax(vshader,{async:false}).responseText,
+		// fragmentShader: $.ajax(sFshader,{async:false}).responseText
+		vertexShader: document.getElementById('vshader').textContent,
+		fragmentShader: document.getElementById('sFshader').textContent,
+
 	});
 
 	//create plane geometry
@@ -160,10 +168,10 @@ function runSimulation(initial_condition){
 
     //do the THING
 
-	// planeScreen.material = initialMaterial;
+	planeScreen.material = initialMaterial;
 	// mUniforms.tSource.value = initTextureBuffer;
-	// renderer.render(scene, camera, mTextureBuffer1, true);
-	// renderer.render(scene, camera, mTextureBuffer2, true);
+	renderer.render(scene, camera, mTextureBuffer1, true);
+	renderer.render(scene, camera, mTextureBuffer2, true);
 	mUniforms.tSource.value = mTextureBuffer1;
 	planeScreen.material = screenMaterial;
 	renderer.render(scene,camera);
