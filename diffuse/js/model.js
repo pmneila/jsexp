@@ -119,23 +119,24 @@ function init(){
  
 
 	// Load the simulation
-	var loader = new THREE.ImageLoader();
-	loader.load(
-		// resource URL
-		"img/diffuse1.png",
-		// Function when resource is loaded
-		function ( image ) {			
-			runSimulation(image);
-		},
-		// Function called when download progresses
-		function ( xhr ) {
-			console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-		},
-		// Function called when download errors
-		function ( xhr ) {
-			console.log( 'An error happened' );
-		}
-	);
+	// var loader = new THREE.ImageLoader();
+	// loader.load(
+	// 	// resource URL
+	// 	"img/diffuse1.png",
+	// 	// Function when resource is loaded
+	// 	function ( image ) {			
+	// 		runSimulation(image);
+	// 	},
+	// 	// Function called when download progresses
+	// 	function ( xhr ) {
+	// 		console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+	// 	},
+	// 	// Function called when download errors
+	// 	function ( xhr ) {
+	// 		console.log( 'An error happened' );
+	// 	}
+	// );
+	runSimulation();
 
 }
 
@@ -151,11 +152,11 @@ function runSimulation(initial_condition){
 
 	//set initial condition
 
-	initTextureBuffer = new THREE.Texture(initial_condition);
-    initTextureBuffer.wrapS = THREE.ClampToEdgeWrapping; // are these necessary?
-    initTextureBuffer.wrapT = THREE.ClampToEdgeWrapping;
-    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
-    initTextureBuffer.needsUpdate = true; //this IS necessary
+	// initTextureBuffer = new THREE.Texture(initial_condition);
+ //    initTextureBuffer.wrapS = THREE.ClampToEdgeWrapping; // are these necessary?
+ //    initTextureBuffer.wrapT = THREE.ClampToEdgeWrapping;
+ //    initTextureBuffer.repeat.x = initTextureBuffer.repeat.y = 512;
+ //    initTextureBuffer.needsUpdate = true; //this IS necessary
 
     //do the THING
 
