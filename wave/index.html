@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title> Wave (jgalazm) </title>		
+		<script src="js/three.min.js"></script>
+		<!--<script src="src/Three.js"></script>-->
+		<script src="js/jquery-1.11.3.min.js"></script>			
+		<script src="js/TrackBallControls.js"></script>	
+		<script src="js/orbitcontrols.js"></script>
+		<script src="js/dat.gui.min.js"></script>				
+		<script src="js/model.js"></script>
+		<script>
+			var vshader = 'shaders/vshader.glsl';
+			var deformVShader = 'shaders/deformVShader.glsl';
+			var iFshader = 'shaders/initFShader.glsl';
+			var mFshader = 'shaders/modelFShader.glsl';
+			var sFshader = 'shaders/screenFShader.glsl';		
+			var cloneFshader = 'shaders/cloneFShader.glsl';	
+			$(function(){
+				init();
+			});
+		</script>		
+
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+			html, body {
+		    margin: 0;
+		    height: 100%;
+			}
+			#controls{
+				position: absolute;
+				top: 0px;
+			}
+		</style>
+	</head>		
+
+	<body>
+			
+		<div id="simulation" style='display:inline-block;'>
+			<canvas id="container" style="width:1024px;height:512px;border:1px solid #d0d0d0;" ></canvas>
+		</div>
+		<div id="controls">
+		</div>	
+	</body>
+
+
+</html>
+
