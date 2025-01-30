@@ -7,7 +7,7 @@ Some JavaScript experiments. You can see them online using the links below.
 for these demos, but `Opera <http://www.opera.com>`_ or
 Firefox should be fine too.
 
-`Gray-Scott <http://pmneila.github.com/jsexp/grayscott/>`_
+`Gray-Scott <http://pmneila.github.io/jsexp/grayscott/>`_
 ==========================================================
 
 `Gray-Scott <http://pmneila.github.com/jsexp/grayscott/>`_
@@ -16,7 +16,7 @@ can be seen as a simulation of the behavior of diffusive living beings reproduci
 under conditions of limited food. Very different patterns emerge for
 slight changes in feeding and death rates.
 
-This experiment uses `Three.js <http://mrdoob.github.com/three.js/>`_
+This experiment uses `Three.js <http://mrdoob.github.io/three.js/>`_
 and performs calculations on the GPU.
 It requires a WebGL enabled browser.
 
@@ -72,12 +72,12 @@ Some screenshots of the application.
   :target: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/wormsx.png
 
 
-`Particles <http://pmneila.github.com/jsexp/massspring/>`_
+`Particles <http://pmneila.github.io/jsexp/massspring/>`_
 =========================================================
 
-`Particles <http://pmneila.github.com/jsexp/massspring/>`_
+`Particles <http://pmneila.github.io/jsexp/massspring/>`_
 is a simple mass-spring physics simulation.
 
 .. image:: https://github.com/pmneila/jsexp/raw/master/massspring/particles.png
    :align: center
-   :target: http://pmneila.github.com/jsexp/massspring
+   :target: http://pmneila.github.io/jsexp/massspring
